@@ -8,10 +8,16 @@ size = Vector3(100, 100, 100)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xepy2"]
 size = Vector2(492, 102)
 
+[sub_resource type="QuadMesh" id="QuadMesh_qc24j"]
+size = Vector2(100, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8dto7"]
+size = Vector2(101, 100)
+
 [node name="World" type="Node2D" unique_id=1548029567]
 
 [node name="Player" parent="." unique_id=1705927466 instance=ExtResource("1_62w18")]
-position = Vector2(41, 43)
+position = Vector2(452, 344)
 
 [node name="Platform" type="StaticBody2D" parent="." unique_id=2101531985]
 
@@ -25,7 +31,12 @@ position = Vector2(255, 537)
 shape = SubResource("RectangleShape2D_xepy2")
 
 [node name="BaseStation" type="Area2D" parent="." unique_id=1302406260]
+position = Vector2(-415, 1)
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="BaseStation" unique_id=591797586]
+position = Vector2(480, 422)
+mesh = SubResource("QuadMesh_qc24j")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BaseStation" unique_id=2040472398]
-
-[node name="Node2D" type="Node2D" parent="BaseStation/CollisionShape2D" unique_id=1176279472]
+position = Vector2(480.5, 422)
+shape = SubResource("RectangleShape2D_8dto7")
