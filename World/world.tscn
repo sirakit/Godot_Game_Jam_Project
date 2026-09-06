@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ckavqb25bdaul"]
 
-[ext_resource type="PackedScene" uid="uid://ckudr8chj1kgo" path="res://Character/player.tscn" id="1_f3sb7"]
+[ext_resource type="PackedScene" uid="uid://ckudr8chj1kgo" path="res://Character/player.tscn" id="1_62w18"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_xepy2"]
 size = Vector3(100, 100, 100)
@@ -10,7 +10,7 @@ size = Vector2(492, 102)
 
 [node name="World" type="Node2D" unique_id=1548029567]
 
-[node name="Player" parent="." unique_id=1705927466 instance=ExtResource("1_f3sb7")]
+[node name="Player" parent="." unique_id=1705927466 instance=ExtResource("1_62w18")]
 position = Vector2(41, 43)
 
 [node name="Platform" type="StaticBody2D" parent="." unique_id=2101531985]
@@ -23,3 +23,9 @@ mesh = SubResource("BoxMesh_xepy2")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform" unique_id=380997551]
 position = Vector2(255, 537)
 shape = SubResource("RectangleShape2D_xepy2")
+
+[node name="BaseStation" type="Area2D" parent="." unique_id=1302406260]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BaseStation" unique_id=2040472398]
+
+[node name="Node2D" type="Node2D" parent="BaseStation/CollisionShape2D" unique_id=1176279472]
