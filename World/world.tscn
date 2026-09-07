@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ckavqb25bdaul"]
 
 [ext_resource type="PackedScene" uid="uid://ckudr8chj1kgo" path="res://Character/player.tscn" id="1_62w18"]
+[ext_resource type="Script" uid="uid://xfcp4g50t6co" path="res://World/base_station.gd" id="2_8a836"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_xepy2"]
 size = Vector3(100, 100, 100)
@@ -32,6 +33,8 @@ shape = SubResource("RectangleShape2D_xepy2")
 
 [node name="BaseStation" type="Area2D" parent="." unique_id=1302406260]
 position = Vector2(-415, 1)
+collision_layer = 0
+script = ExtResource("2_8a836")
 
 [node name="MeshInstance2D" type="MeshInstance2D" parent="BaseStation" unique_id=591797586]
 position = Vector2(480, 422)
@@ -40,3 +43,6 @@ mesh = SubResource("QuadMesh_qc24j")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BaseStation" unique_id=2040472398]
 position = Vector2(480.5, 422)
 shape = SubResource("RectangleShape2D_8dto7")
+
+[connection signal="body_entered" from="BaseStation" to="BaseStation" method="_on_body_entered"]
+[connection signal="body_exited" from="BaseStation" to="BaseStation" method="_on_body_exited"]
