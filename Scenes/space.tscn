@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://ckavqb25bdaul"]
+
+[ext_resource type="PackedScene" uid="uid://ckudr8chj1kgo" path="res://Scenes/player.tscn" id="1_0ll74"]
+[ext_resource type="Script" uid="uid://brueuaot3k5fq" path="res://Scripts/space.gd" id="1_p3ued"]
+[ext_resource type="Texture2D" uid="uid://ct3awjdibwdkv" path="res://Assets/pixelart_starfield_corona.png" id="2_2fo43"]
+
+[sub_resource type="GDScript" id="GDScript_2fo43"]
+script/source = "extends Line2D
+
+
+@onready var player = $Player
+@onready var ship = $Ship
+@onready var tether_rope = $TetherRope
+
+func _process(_delta):
+	# วาดเส้นจาก ยาน ไปยัง ตัวละคร
+	tether_rope.clear_points()
+	tether_rope.add_point(ship.global_position)
+	tether_rope.add_point(player.global_position)
+
+"
+
+[node name="Space" type="Node2D" unique_id=1548029567]
+script = ExtResource("1_p3ued")
+
+[node name="PixelartStarfieldCorona" type="Sprite2D" parent="." unique_id=554970795]
+position = Vector2(760.0005, 259.00012)
+scale = Vector2(36.94609, 30.434374)
+texture = ExtResource("2_2fo43")
+
+[node name="TetherRope" type="Line2D" parent="." unique_id=1912738752]
+points = PackedVector2Array(2, -8)
+width = 4.0
+script = SubResource("GDScript_2fo43")
+
+[node name="Player" parent="." unique_id=1705927466 instance=ExtResource("1_0ll74")]
+position = Vector2(575, 324)
