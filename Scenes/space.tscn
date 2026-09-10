@@ -1,37 +1,115 @@
 [gd_scene format=3 uid="uid://ckavqb25bdaul"]
 
-[ext_resource type="PackedScene" uid="uid://ckudr8chj1kgo" path="res://Scenes/player.tscn" id="1_0ll74"]
-[ext_resource type="Script" uid="uid://brueuaot3k5fq" path="res://Scripts/space.gd" id="1_p3ued"]
-[ext_resource type="Texture2D" uid="uid://ct3awjdibwdkv" path="res://Assets/pixelart_starfield_corona.png" id="2_2fo43"]
-
-[sub_resource type="GDScript" id="GDScript_2fo43"]
-script/source = "extends Line2D
-
-
-@onready var player = $Player
-@onready var ship = $Ship
-@onready var tether_rope = $TetherRope
-
-func _process(_delta):
-	# วาดเส้นจาก ยาน ไปยัง ตัวละคร
-	tether_rope.clear_points()
-	tether_rope.add_point(ship.global_position)
-	tether_rope.add_point(player.global_position)
-
-"
+[ext_resource type="PackedScene" uid="uid://bhb1vey30wsvl" path="res://Scenes/player.tscn" id="1_0ll74"]
+[ext_resource type="PackedScene" uid="uid://v5tj4dkrr3nd" path="res://Scenes/ship.tscn" id="1_2fo43"]
+[ext_resource type="Script" uid="uid://brueuaot3k5fq" path="res://Scenes/space.gd" id="1_va77k"]
+[ext_resource type="PackedScene" uid="uid://div5cflstw8r3" path="res://Scenes/meteorite.tscn" id="3_wnfdr"]
+[ext_resource type="PackedScene" uid="uid://tg8xht3avehv" path="res://Scenes/UI.tscn" id="4_wnfdr"]
+[ext_resource type="Script" uid="uid://0i87qthaqe4o" path="res://Scripts/UI.gd" id="5_bj3u6"]
 
 [node name="Space" type="Node2D" unique_id=1548029567]
-script = ExtResource("1_p3ued")
+script = ExtResource("1_va77k")
 
-[node name="PixelartStarfieldCorona" type="Sprite2D" parent="." unique_id=554970795]
-position = Vector2(760.0005, 259.00012)
-scale = Vector2(36.94609, 30.434374)
-texture = ExtResource("2_2fo43")
+[node name="Ship" parent="." unique_id=1198528667 instance=ExtResource("1_2fo43")]
+position = Vector2(571, 531)
 
-[node name="TetherRope" type="Line2D" parent="." unique_id=1912738752]
-points = PackedVector2Array(2, -8)
-width = 4.0
-script = SubResource("GDScript_2fo43")
+[node name="RopeLine" type="Line2D" parent="." unique_id=1556158889]
 
 [node name="Player" parent="." unique_id=1705927466 instance=ExtResource("1_0ll74")]
-position = Vector2(575, 324)
+position = Vector2(569, 534)
+
+[node name="Meteorites" type="Node2D" parent="." unique_id=1236688864]
+
+[node name="Meteorite" parent="Meteorites" unique_id=205495736 instance=ExtResource("3_wnfdr")]
+position = Vector2(189, 312)
+
+[node name="Meteorite2" parent="Meteorites" unique_id=590596685 instance=ExtResource("3_wnfdr")]
+position = Vector2(824, 253)
+
+[node name="Meteorite3" parent="Meteorites" unique_id=520735452 instance=ExtResource("3_wnfdr")]
+position = Vector2(336, 169)
+
+[node name="Meteorite4" parent="Meteorites" unique_id=2000773038 instance=ExtResource("3_wnfdr")]
+position = Vector2(-192, 116)
+
+[node name="Meteorite5" parent="Meteorites" unique_id=1244253907 instance=ExtResource("3_wnfdr")]
+position = Vector2(1204, 374)
+
+[node name="Meteorite6" parent="Meteorites" unique_id=830581322 instance=ExtResource("3_wnfdr")]
+position = Vector2(306, 552)
+
+[node name="Meteorite7" parent="Meteorites" unique_id=243611442 instance=ExtResource("3_wnfdr")]
+position = Vector2(931, 459)
+
+[node name="Meteorite8" parent="Meteorites" unique_id=529335411 instance=ExtResource("3_wnfdr")]
+position = Vector2(613, 181)
+
+[node name="CanvasLayer" parent="." unique_id=257948033 instance=ExtResource("4_wnfdr")]
+visible = true
+
+[node name="Control2" type="Control" parent="CanvasLayer" unique_id=1021626880]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("5_bj3u6")
+
+[node name="OxygenBar" type="ProgressBar" parent="CanvasLayer/Control2" unique_id=161583502]
+layout_mode = 1
+offset_right = 278.0
+offset_bottom = 27.0
+
+[node name="TetherBar" type="ProgressBar" parent="CanvasLayer/Control2" unique_id=260481432]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -288.0
+offset_right = 243.0
+offset_bottom = -261.0
+grow_vertical = 2
+
+[node name="PointsLabel" type="Label" parent="CanvasLayer/Control2" unique_id=1715571022]
+layout_mode = 0
+offset_top = 144.0
+offset_right = 40.0
+offset_bottom = 167.0
+
+[node name="ArtifactsLabel" type="Label" parent="CanvasLayer/Control2" unique_id=648954511]
+layout_mode = 0
+offset_top = 114.0
+offset_right = 40.0
+offset_bottom = 137.0
+
+[node name="HintLabel" type="Label" parent="CanvasLayer/Control2" unique_id=316600596]
+layout_mode = 0
+offset_top = 79.0
+offset_right = 382.0
+offset_bottom = 102.0
+text = "กด E เพื่อออกจากยาน / เก็บของ, กด Space ค้างเพื่อสกัด"
+
+[node name="UpgradeButtons" type="HBoxContainer" parent="CanvasLayer/Control2" unique_id=1827007826]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -418.0
+offset_top = -83.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BtnOxygen" type="Button" parent="CanvasLayer/Control2/UpgradeButtons" unique_id=1543831764]
+layout_mode = 2
+text = "อัปเกรด O2 (20pt)"
+
+[node name="BtnChisel" type="Button" parent="CanvasLayer/Control2/UpgradeButtons" unique_id=858398630]
+layout_mode = 2
+text = "อัปเกรดสิ่ว (20pt)"
+
+[node name="BtnTether" type="Button" parent="CanvasLayer/Control2/UpgradeButtons" unique_id=1086722945]
+layout_mode = 2
+text = "อัปเกรดเชือก (20pt)"

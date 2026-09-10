@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://164t32s35mix"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xepy2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qc24j"]
+size = Vector2(684, 72.5)
+
+[node name="Platform" type="StaticBody2D" unique_id=1267527452]
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="." unique_id=1530782513]
+position = Vector2(-1, 1.000001)
+scale = Vector2(684.31244, 71.81259)
+mesh = SubResource("BoxMesh_xepy2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=961550416]
+position = Vector2(0, 1)
+shape = SubResource("RectangleShape2D_qc24j")

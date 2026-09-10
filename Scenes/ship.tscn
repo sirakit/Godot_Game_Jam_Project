@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://v5tj4dkrr3nd"]
+
+[node name="Ship" type="Node2D" unique_id=1198528667]
+
+[node name="Hull" type="ColorRect" parent="." unique_id=743925368]
+offset_left = -59.0
+offset_top = -63.0
+offset_right = 59.0
+offset_bottom = 64.0
+color = Color(0, 0, 0.15294118, 1)
