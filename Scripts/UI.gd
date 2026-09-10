@@ -1,9 +1,12 @@
 extends Control
 
+@onready var upgrade_button: Button = $BtnSpeed
 @onready var oxygen_bar: ProgressBar = $OxygenBar
 @onready var tether_bar: ProgressBar = $TetherBar
 @onready var points_label: Label = $PointsLabel
 @onready var artifacts_label: Label = $ArtifactsLabel
+
+@export var player: CharacterBody2D
 
 func _ready():
 	Game.oxygen_changed.connect(_on_oxygen_changed)
@@ -29,7 +32,7 @@ func _on_tether_changed(value, max_value):
 	tether_bar.value = value
 
 func _on_points_changed(value):
-	points_label.text = "แต้ม:%d" % value
+	points_label.text = "Credit: %d" % value
 
 func _on_artifacts_changed(count):
-	artifacts_label.text = "กำลังถืออาร์ติแฟกต์:%d ชิ้น" % count
+	artifacts_label.text = "Numbers of Artifact: %d " % count

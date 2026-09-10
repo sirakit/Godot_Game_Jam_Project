@@ -45,7 +45,7 @@ func cool_down(delta: float):
 
 func reveal_artifact():
 	artifact_revealed = true
-	rock_sprite.color = Color(0.3, 0.015, 0.221, 1.0)
+	rock_sprite.color = Color(0.25, 0.25, 0.25)
 	artifact_sprite.visible = true
 
 func get_heat_ratio() -> float:
