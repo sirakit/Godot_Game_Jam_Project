@@ -56,17 +56,17 @@ func should_retract() -> bool:
 func upgrade_oxygen():
 	if points >= 20:
 		points -= 20
-		oxygen_max += 20.0
+		oxygen_max += 40
 		emit_signal("points_changed", points)
 
 func upgrade_chisel():
-	if points >= 20:
-		points -= 20
-		chisel_strength += 0.5
+	if points >= 15:
+		points -= 15
+		chisel_strength += 1
 		emit_signal("points_changed", points)
 
 func upgrade_tether():
-	if points >= 20:
-		points -= 20
-		tether_time_max += 5.0
+	if points >= 10:
+		points -= 10
+		tether_time_max += 10.0
 		emit_signal("points_changed", points)

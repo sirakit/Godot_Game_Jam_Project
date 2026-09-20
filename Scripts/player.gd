@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var thrust_speed: float = 600.0
+@export var thrust_speed: float = 550.0
 @export var damping: float = 0.92
 @export var retract_speed_mult: float = 2.0
 

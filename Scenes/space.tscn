@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://bhb1vey30wsvl" path="res://Scenes/player.tscn" id="1_0ll74"]
 [ext_resource type="PackedScene" uid="uid://v5tj4dkrr3nd" path="res://Scenes/ship.tscn" id="1_2fo43"]
-[ext_resource type="Script" uid="uid://brueuaot3k5fq" path="res://Scenes/space.gd" id="1_va77k"]
+[ext_resource type="Script" uid="uid://brueuaot3k5fq" path="res://Scripts/space.gd" id="1_va77k"]
 [ext_resource type="PackedScene" uid="uid://div5cflstw8r3" path="res://Scenes/meteorite.tscn" id="3_wnfdr"]
 [ext_resource type="Script" uid="uid://0i87qthaqe4o" path="res://Scripts/UI.gd" id="5_bj3u6"]
 
