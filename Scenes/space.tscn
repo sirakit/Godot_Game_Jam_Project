@@ -20,6 +20,7 @@ position = Vector2(570, 534)
 
 [node name="MeteoriteSpawner" type="Node2D" parent="." unique_id=1236688864]
 script = ExtResource("4_va77k")
+meteorite_scene = ExtResource("3_wnfdr")
 
 [node name="Meteorite" parent="MeteoriteSpawner" unique_id=205495736 instance=ExtResource("3_wnfdr")]
 position = Vector2(189, 312)
@@ -32,81 +33,6 @@ position = Vector2(336, 169)
 
 [node name="Meteorite4" parent="MeteoriteSpawner" unique_id=2000773038 instance=ExtResource("3_wnfdr")]
 position = Vector2(-192, 116)
-
-[node name="Meteorite5" parent="MeteoriteSpawner" unique_id=1244253907 instance=ExtResource("3_wnfdr")]
-position = Vector2(1204, 374)
-
-[node name="Meteorite6" parent="MeteoriteSpawner" unique_id=830581322 instance=ExtResource("3_wnfdr")]
-position = Vector2(306, 552)
-
-[node name="Meteorite7" parent="MeteoriteSpawner" unique_id=243611442 instance=ExtResource("3_wnfdr")]
-position = Vector2(931, 459)
-
-[node name="Meteorite8" parent="MeteoriteSpawner" unique_id=529335411 instance=ExtResource("3_wnfdr")]
-position = Vector2(613, 183)
-
-[node name="Meteorite9" parent="MeteoriteSpawner" unique_id=1649044442 instance=ExtResource("3_wnfdr")]
-position = Vector2(976, -177)
-
-[node name="Meteorite10" parent="MeteoriteSpawner" unique_id=1692661984 instance=ExtResource("3_wnfdr")]
-position = Vector2(399, -51)
-
-[node name="Meteorite11" parent="MeteoriteSpawner" unique_id=776064428 instance=ExtResource("3_wnfdr")]
-position = Vector2(1479, 162)
-
-[node name="Meteorite12" parent="MeteoriteSpawner" unique_id=171783994 instance=ExtResource("3_wnfdr")]
-position = Vector2(1441, -405)
-
-[node name="Meteorite13" parent="MeteoriteSpawner" unique_id=447722544 instance=ExtResource("3_wnfdr")]
-position = Vector2(491, 1083)
-
-[node name="Meteorite14" parent="MeteoriteSpawner" unique_id=2052979418 instance=ExtResource("3_wnfdr")]
-position = Vector2(1089, 877)
-
-[node name="Meteorite15" parent="MeteoriteSpawner" unique_id=893825387 instance=ExtResource("3_wnfdr")]
-position = Vector2(-19, 792)
-
-[node name="Meteorite16" parent="MeteoriteSpawner" unique_id=904081767 instance=ExtResource("3_wnfdr")]
-position = Vector2(-144, 541)
-
-[node name="Meteorite17" parent="MeteoriteSpawner" unique_id=1743097174 instance=ExtResource("3_wnfdr")]
-position = Vector2(2, -396)
-
-[node name="Meteorite18" parent="MeteoriteSpawner" unique_id=1062441175 instance=ExtResource("3_wnfdr")]
-position = Vector2(1846, 765)
-
-[node name="Meteorite19" parent="MeteoriteSpawner" unique_id=1204553349 instance=ExtResource("3_wnfdr")]
-position = Vector2(-386, 1343)
-
-[node name="Meteorite20" parent="MeteoriteSpawner" unique_id=1163213870 instance=ExtResource("3_wnfdr")]
-position = Vector2(-701, 69)
-
-[node name="Meteorite21" parent="MeteoriteSpawner" unique_id=1721184287 instance=ExtResource("3_wnfdr")]
-position = Vector2(682, -424)
-
-[node name="Meteorite22" parent="MeteoriteSpawner" unique_id=708074787 instance=ExtResource("3_wnfdr")]
-position = Vector2(1952, -153)
-
-[node name="Meteorite23" parent="MeteoriteSpawner" unique_id=2146441914 instance=ExtResource("3_wnfdr")]
-position = Vector2(2235, 627)
-
-[node name="Meteorite24" parent="MeteoriteSpawner" unique_id=718530310 instance=ExtResource("3_wnfdr")]
-position = Vector2(-630, -519)
-
-[node name="Meteorite25" parent="MeteoriteSpawner" unique_id=1076775357 instance=ExtResource("3_wnfdr")]
-position = Vector2(640, -1190)
-
-[node name="Meteorite26" parent="MeteoriteSpawner" unique_id=189586482 instance=ExtResource("3_wnfdr")]
-position = Vector2(119, -890)
-
-[node name="Meteorite27" parent="MeteoriteSpawner" unique_id=1162951473 instance=ExtResource("3_wnfdr")]
-position = Vector2(2672, -187)
-
-[node name="Meteorite28" parent="MeteoriteSpawner" unique_id=1590514493 instance=ExtResource("3_wnfdr")]
-position = Vector2(1708, 1174)
-
-[node name="Meteorite29" parent="MeteoriteSpawner" unique_id=1363213797 instance=ExtResource("3_wnfdr")]
-position = Vector2(718, 1500)
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=1442621378]
 
