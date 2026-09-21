@@ -25,3 +25,27 @@ uv = PackedVector2Array(5.200012, 9.200005, 77.20001, -10, 72, -13, 25.200012, -
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1153831540]
 shape = SubResource("CircleShape2D_xepy2")
+
+[node name="ExtractBar" type="ProgressBar" parent="." unique_id=728229679]
+offset_left = -56.0
+offset_top = -56.0
+offset_right = -52.0
+offset_bottom = -29.0
+fill_mode = 3
+show_percentage = false
+
+[node name="HeatBar" type="ProgressBar" parent="." unique_id=1993578942]
+offset_left = -45.0
+offset_top = -56.0
+offset_right = -41.0
+offset_bottom = -29.0
+fill_mode = 3
+show_percentage = false
+
+[node name="IntegrityBar" type="ProgressBar" parent="." unique_id=709556652]
+offset_left = -34.0
+offset_top = -56.0
+offset_right = -30.0
+offset_bottom = -29.0
+fill_mode = 3
+show_percentage = false
