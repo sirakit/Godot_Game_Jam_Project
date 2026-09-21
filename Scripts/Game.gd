@@ -11,8 +11,8 @@ var oxygen_max: float = 100.0
 var oxygen: float = 100.0
 var oxygen_drain_rate: float = 4.0
 
-var tether_length_max: float = 1200.0           # เปลี่ยนจาก "วินาที" เป็น "พิกเซล"
-var tether_remaining: float = 1200.0
+var tether_length_max: float = 500.0           # เปลี่ยนจาก "วินาที" เป็น "พิกเซล"
+var tether_remaining: float = 500.0
 
 var chisel_strength: float = 1.0
 var drill_strength: float = 1.0                 # เดิมประกาศไว้แต่ไม่เคยถูกใช้ — ตอนนี้ใช้จริงกับ V2
@@ -105,7 +105,7 @@ func upgrade_income() -> void:
 
 func reset_all() -> void:                        # สำหรับปุ่ม restart (playtest 1)
 	oxygen_max = 100.0
-	tether_length_max = 1200.0
+	tether_length_max = 500.0
 	chisel_strength = 1.0
 	drill_strength = 1.0
 	income_multiplier = 1.0

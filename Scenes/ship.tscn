@@ -9,7 +9,7 @@ size = Vector2(250, 100)
 size = Vector2(250, 100)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xepy2"]
-radius = 87.005745
+radius = 180.0
 
 [node name="Ship" type="Node2D" unique_id=1198528667]
 script = ExtResource("1_78pfh")
