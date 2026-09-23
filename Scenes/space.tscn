@@ -40,6 +40,15 @@ position = Vector2(805, 344)
 [node name="Meteorite7" parent="MeteoriteSpawner" unique_id=889060345 instance=ExtResource("3_wnfdr")]
 position = Vector2(1219, 344)
 
+[node name="Meteorite10" parent="MeteoriteSpawner" unique_id=878428046 instance=ExtResource("3_wnfdr")]
+position = Vector2(778, 134)
+
+[node name="Meteorite9" parent="MeteoriteSpawner" unique_id=861841668 instance=ExtResource("3_wnfdr")]
+position = Vector2(613, 877)
+
+[node name="Meteorite8" parent="MeteoriteSpawner" unique_id=338698535 instance=ExtResource("3_wnfdr")]
+position = Vector2(199, 612)
+
 [node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=1442621378]
 
 [node name="UI" type="Control" parent="CanvasLayer2" unique_id=1726792837]
