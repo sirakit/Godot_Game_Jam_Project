@@ -8,6 +8,7 @@ var ship_position: Vector2 = Vector2.ZERO
 var docked: bool = true
 var being_retracted: bool = false
 var current_meteorite: Node2D = null
+var meteorites_in_range: Array[Area2D] = []
 var near_ship: bool = false                     # ตั้งค่าโดย ship.gd
 
 @onready var detect_area: Area2D = $DetectArea
@@ -48,7 +49,7 @@ func _physics_process(delta: float) -> void:
 	velocity *= damping
 	move_and_slide()
 
-	# --- Feature 4: เชือกเป็นกำแพงล่องหน + เกจลดตามระยะจริง ---
+	# # เชือกเป็นกำแพงล่องหน + เกจลดตามระยะจริง
 	var to_ship := global_position - ship_position
 	var dist := to_ship.length()
 	if dist > Game.tether_length_max:
@@ -56,16 +57,17 @@ func _physics_process(delta: float) -> void:
 		global_position = ship_position + n * Game.tether_length_max
 		var outward := velocity.dot(n)
 		if outward > 0.0:
-			velocity -= n * outward               # ตัดแรงที่พุ่งออก เหลือให้ไถลรอบวงได้
+			velocity -= n * outward               
 		dist = Game.tether_length_max
 	Game.update_tether(dist)
 
-	# --- Feature 5: กด E ใกล้ยาน = ส่งของ (playtest 5 ขอมาตรงๆ) ---
+	# # กด E ใกล้ยาน = ส่งของ
 	if near_ship and Input.is_action_just_pressed("interact"):
 		_finish_dock()
 		return
-
-	# --- สกัดหิน ---
+		
+	_update_target()
+	# # สกัดหิน
 	if is_instance_valid(current_meteorite):
 		if Input.is_action_pressed("chisel"):
 			current_meteorite.chisel(delta, Game.chisel_strength)
@@ -73,7 +75,7 @@ func _physics_process(delta: float) -> void:
 			current_meteorite.cool_down(delta)
 		if Input.is_action_just_pressed("interact"):
 			current_meteorite.collect()
-			current_meteorite = null
+			_set_target(null)
 	else:
 		current_meteorite = null                  # กัน error เมื่ออุกกาบาตถูก queue_free
 
@@ -85,16 +87,42 @@ func undock() -> void:
 func _finish_dock() -> void:
 	being_retracted = false
 	docked = true
-	current_meteorite = null
+	_set_target(null)
 	global_position = ship_position
 	Game.dock()
 
 func _on_area_entered(area: Area2D) -> void:
 	var meteor := area.get_parent()
-	if meteor.has_method("chisel"):
-		current_meteorite = meteor
+	if meteor.has_method("chisel") and not meteorites_in_range.has(area):
+		meteorites_in_range.append(area)
 
 func _on_area_exited(area: Area2D) -> void:
-	var meteor := area.get_parent()
-	if meteor == current_meteorite:
-		current_meteorite = null
+	meteorites_in_range.erase(area)
+
+func _update_target() -> void:
+	meteorites_in_range = meteorites_in_range.filter(func(a): return is_instance_valid(a))
+
+	var nearest: Node2D = null
+	var nearest_dist := INF
+	for area in meteorites_in_range:
+		var meteor := area.get_parent()
+		if not is_instance_valid(meteor):
+			continue
+		var d := global_position.distance_to(meteor.global_position)
+		if d < nearest_dist:
+			nearest_dist = d
+			nearest = meteor
+
+	# กันสลับเป้าถี่ๆ ตอนสองลูกอยู่ใกล้ผู้เล่นพอๆ กัน 
+	if is_instance_valid(current_meteorite) and nearest != current_meteorite:
+		var current_dist := global_position.distance_to(current_meteorite.global_position)
+		if current_dist - nearest_dist < 20.0:
+			return
+
+	if nearest != current_meteorite:
+		_set_target(nearest)
+
+func _set_target(meteor: Node2D) -> void:
+	if is_instance_valid(current_meteorite) and current_meteorite != meteor:
+		current_meteorite.set_targeted(false)     
+	current_meteorite = meteor

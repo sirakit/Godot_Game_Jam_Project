@@ -71,6 +71,10 @@ func _set_bars_visible(v: bool) -> void:
 	heat_bar.visible = v
 	integrity_bar.visible = v and artifact_revealed
 
+func set_targeted(active: bool) -> void:
+	if not active:
+		_set_bars_visible(false)
+
 func chisel(delta: float, strength: float) -> void:
 	if artifact_collected:
 		return

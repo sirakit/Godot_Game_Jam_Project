@@ -65,7 +65,6 @@ func update_tether(distance_from_ship: float) -> void:
 	tether_remaining = max(0.0, tether_length_max - distance_from_ship)
 	tether_changed.emit(tether_remaining, tether_length_max)
 
-# เชือกไม่ทำให้จบทริปแล้ว — มันเป็น "กำแพง" ส่วน oxygen เป็น "นาฬิกา"
 func should_retract() -> bool:
 	return oxygen <= 0.0
 
@@ -91,7 +90,7 @@ func upgrade_chisel() -> void:
 
 func upgrade_tether() -> void:
 	if _buy("tether"):
-		tether_length_max += 300.0
+		tether_length_max += 500.0
 		tether_remaining = tether_length_max
 		tether_changed.emit(tether_remaining, tether_length_max)
 
