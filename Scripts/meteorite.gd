@@ -31,9 +31,9 @@ var _shake: float = 0.0
 
 @onready var rock_sprite: Polygon2D = $RockShape
 @onready var artifact_sprite: Polygon2D = $Artifact
-@onready var extract_bar: ProgressBar = $ExtractBar       # ต้องเพิ่ม node นี้
-@onready var heat_bar: ProgressBar = $HeatBar             # ต้องเพิ่ม node นี้
-@onready var integrity_bar: ProgressBar = $IntegrityBar   # ต้องเพิ่ม node นี้
+@onready var extract_bar: ProgressBar = $ExtractBar       
+@onready var heat_bar: ProgressBar = $HeatBar             
+@onready var integrity_bar: ProgressBar = $IntegrityBar   
 
 func _ready() -> void:
 	rock_integrity = rock_integrity_max
@@ -59,7 +59,7 @@ func _process(delta: float) -> void:
 		)
 		rotation += spin_speed * delta
 
-	# สั่นตอนสกัด = feedback ที่ playtest 5 ขอ ("chiseling doesn't register any reaction")
+	# สั่นตอนสกัด 
 	if _shake > 0.0:
 		_shake = max(0.0, _shake - delta * 8.0)
 		rock_sprite.position = Vector2(randf_range(-2, 2), randf_range(-2, 2)) * _shake
@@ -82,7 +82,7 @@ func chisel(delta: float, strength: float) -> void:
 	_shake = 1.0
 	_set_bars_visible(true)
 
-	# ถ้าสว่านยังไม่แรงพอสำหรับหินชนิดนี้ จะขุดได้แต่ช้ามาก (ใช้ drill_strength ที่เดิมประกาศไว้เฉยๆ)
+	# ถ้าสว่านยังไม่แรงพอสำหรับหินชนิดนี้ จะขุดได้แต่ช้ามาก
 	var effective := strength
 	if Game.drill_strength < required_drill:
 		effective *= 0.35
@@ -114,7 +114,7 @@ func cool_down(delta: float) -> void:
 func _update_bars() -> void:
 	heat_bar.value = heat
 	integrity_bar.value = artifact_health
-	# เตือนด้วยสี: ปลอดภัย = ส้ม, อันตราย = แดงสด
+	#ปลอดภัย = ส้ม, อันตราย = แดงสด
 	var danger := heat_damage_threshold if not artifact_revealed else heat_damage_threshold * 0.6
 	heat_bar.modulate = Color(1.0, 0.25, 0.15) if heat > danger else Color(1.0, 0.65, 0.2)
 	integrity_bar.modulate = Color(1.0, 0.3, 0.3) if artifact_health < 50.0 else Color(0.4, 0.9, 1.0)
@@ -133,7 +133,15 @@ func collect() -> bool:
 		artifact_collected = true
 		var quality: float = artifact_health / 100.0
 		var final_value: int = int(artifact_value * max(0.1, quality))
+
+		var is_perfect := artifact_health >= 95.0
+		if is_perfect:
+			final_value = int(final_value * 1.5)     # โบนัส ตอนคุณภาพ 95%+
+
 		Game.add_artifact({"name": artifact_name, "value": final_value})
-		queue_free()          # เดิมแค่ซ่อน sprite ทำให้เหลือ "ซากเปล่า" ลอยค้าง
+		if is_perfect:
+			Game.perfect_extraction.emit()
+
+		queue_free()
 		return true
 	return false

@@ -5,17 +5,18 @@ signal tether_changed(value, max_value)
 signal points_changed(value)
 signal artifacts_changed(count)
 signal trip_ended()
-signal upgrades_changed()                       # ใหม่: ให้ปุ่มรีเฟรชราคา/เลเวลเอง
+signal upgrades_changed()                      
+signal perfect_extraction()
 
 var oxygen_max: float = 100.0
 var oxygen: float = 100.0
 var oxygen_drain_rate: float = 4.0
 
-var tether_length_max: float = 500.0           # เปลี่ยนจาก "วินาที" เป็น "พิกเซล"
+var tether_length_max: float = 500.0           
 var tether_remaining: float = 500.0
 
 var chisel_strength: float = 1.0
-var drill_strength: float = 1.0                 # เดิมประกาศไว้แต่ไม่เคยถูกใช้ — ตอนนี้ใช้จริงกับ V2
+var drill_strength: float = 1.0                
 var income_multiplier: float = 1.0
 
 var points: int = 0
@@ -82,7 +83,7 @@ func upgrade_oxygen() -> void:
 	if _buy("oxygen"):
 		oxygen_max += 40.0
 		oxygen = oxygen_max
-		oxygen_changed.emit(oxygen, oxygen_max)    # <-- บั๊กเดิม: ไม่เคย emit บาร์เลยค้าง
+		oxygen_changed.emit(oxygen, oxygen_max)    
 
 func upgrade_chisel() -> void:
 	if _buy("chisel"):
@@ -102,7 +103,7 @@ func upgrade_income() -> void:
 	if _buy("income"):
 		income_multiplier += 0.25
 
-func reset_all() -> void:                        # สำหรับปุ่ม restart (playtest 1)
+func reset_all() -> void:                        # ปุ่ม restart 
 	oxygen_max = 100.0
 	tether_length_max = 500.0
 	chisel_strength = 1.0

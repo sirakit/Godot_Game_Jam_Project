@@ -80,12 +80,14 @@ layout_mode = 0
 offset_top = 144.0
 offset_right = 40.0
 offset_bottom = 167.0
+text = "Credit:"
 
 [node name="ArtifactsLabel" type="Label" parent="CanvasLayer2/UI" unique_id=1775528617]
 layout_mode = 0
 offset_top = 114.0
 offset_right = 40.0
 offset_bottom = 137.0
+text = "Artifacts carried:"
 
 [node name="HintLabel" type="Label" parent="CanvasLayer2/UI" unique_id=946433765]
 layout_mode = 0
@@ -93,7 +95,7 @@ offset_left = -1.0
 offset_top = 79.0
 offset_right = 521.0
 offset_bottom = 102.0
-text = "Press E to exit the ship/collection, press and hold Space to intercept"
+text = "[SPACE] hold to chisel (watch the HEAT)   [E] collect artifact   fly back to ship + [E] to hand in   [C] collection log"
 
 [node name="O2" type="Label" parent="CanvasLayer2/UI" unique_id=1986622478]
 layout_mode = 0
@@ -111,6 +113,15 @@ offset_right = 287.0
 offset_bottom = 61.0
 text = "TETHER"
 
+[node name="PerfectLabel" type="Label" parent="CanvasLayer2/UI" unique_id=1855824627]
+modulate = Color(1, 1, 0, 1)
+layout_mode = 0
+offset_left = 786.0
+offset_top = 174.0
+offset_right = 994.0
+offset_bottom = 197.0
+text = " PERFECT EXTRACTION! "
+
 [node name="UpgradeButtons" type="HBoxContainer" parent="CanvasLayer2/UI" unique_id=1901410214]
 custom_maximum_size = Vector2(-1, 40)
 layout_mode = 1
@@ -127,18 +138,20 @@ grow_vertical = 0
 
 [node name="BtnOxygen" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=2136530782]
 layout_mode = 2
-text = "Upgrade Oxygen (20pt)"
+text = "O2 Tank"
 
 [node name="BtnChisel" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=1870545741]
 layout_mode = 2
-text = "Upgrade Chisel (15pt)"
+text = "Chisel"
 
 [node name="BtnTether" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=8391678]
 layout_mode = 2
-text = "Upgrade Robe (10pt)"
+text = "Tether"
 
 [node name="BtnDrill" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=2131440032]
 layout_mode = 2
+text = "Drill"
 
 [node name="BtnIncome" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=1716644634]
 layout_mode = 2
+text = "Contract"
