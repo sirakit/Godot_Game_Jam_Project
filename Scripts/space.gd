@@ -5,6 +5,7 @@ extends Node2D
 @onready var rope_line: Line2D = $RopeLine
 
 func _ready() -> void:
+	get_viewport().physics_object_picking = true
 	player.set_ship_position(ship.global_position)
 	rope_line.width = 3.0
 

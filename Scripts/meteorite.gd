@@ -33,7 +33,9 @@ var _shake: float = 0.0
 @onready var artifact_sprite: Polygon2D = $Artifact
 @onready var extract_bar: ProgressBar = $ExtractBar       
 @onready var heat_bar: ProgressBar = $HeatBar             
-@onready var integrity_bar: ProgressBar = $IntegrityBar   
+@onready var integrity_bar: ProgressBar = $IntegrityBar  
+@onready var hover_area: Area2D = $Area2D         
+@onready var info_label: Label = $InfoLabel         # ต้องเพิ่ม node นี้ 
 
 func _ready() -> void:
 	rock_integrity = rock_integrity_max
@@ -49,6 +51,9 @@ func _ready() -> void:
 	integrity_bar.max_value = 100.0
 	integrity_bar.value = 100.0
 	_set_bars_visible(false)
+	info_label.visible = false
+	hover_area.mouse_entered.connect(_on_mouse_entered)
+	hover_area.mouse_exited.connect(_on_mouse_exited)
 
 func _process(delta: float) -> void:
 	if drift_enabled:
@@ -118,6 +123,8 @@ func _update_bars() -> void:
 	var danger := heat_damage_threshold if not artifact_revealed else heat_damage_threshold * 0.6
 	heat_bar.modulate = Color(1.0, 0.25, 0.15) if heat > danger else Color(1.0, 0.65, 0.2)
 	integrity_bar.modulate = Color(1.0, 0.3, 0.3) if artifact_health < 50.0 else Color(0.4, 0.9, 1.0)
+	if info_label.visible:
+		_refresh_info_label()
 
 func reveal_artifact() -> void:
 	artifact_revealed = true
@@ -145,3 +152,32 @@ func collect() -> bool:
 		queue_free()
 		return true
 	return false
+
+func _on_mouse_entered() -> void:
+	_refresh_info_label()
+	info_label.visible = true
+
+func _on_mouse_exited() -> void:
+	info_label.visible = false
+
+func _refresh_info_label() -> void:
+	var lines: Array[String] = []
+	if not artifact_revealed:
+		lines.append("Unidentified Meteorite")
+		lines.append("Integrity: %d%%" % int(100.0 - (rock_integrity / rock_integrity_max) * 100.0))
+	else:
+		lines.append(artifact_name)
+		lines.append("Quality so far: %d%%" % int(artifact_health))
+
+	if required_drill > 1.0:
+		if Game.drill_strength >= required_drill:
+			lines.append("✓ Your Drill is strong enough")
+		else:
+			lines.append("✗ Needs Drill Lv.%d (you have Lv.%d) — will mine 3x slower" %
+				[int(required_drill), int(Game.drill_strength)])
+	else:
+		lines.append("Any Chisel works fine on this one")
+
+	info_label.text = "\n".join(lines)
+	
+	

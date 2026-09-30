@@ -21,6 +21,7 @@ const UPGRADE_UI := {
 }
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	Game.oxygen_changed.connect(_on_oxygen_changed)
 	Game.tether_changed.connect(_on_tether_changed)
 	Game.points_changed.connect(_on_points_changed)

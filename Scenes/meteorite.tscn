@@ -26,6 +26,12 @@ uv = PackedVector2Array(5.200012, 9.200005, 77.20001, -10, 72, -13, 25.200012, -
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1153831540]
 shape = SubResource("CircleShape2D_xepy2")
 
+[node name="InfoLabel" type="Label" parent="." unique_id=862681611]
+offset_left = 39.0
+offset_top = -67.0
+offset_right = 79.0
+offset_bottom = -44.0
+
 [node name="ExtractBar" type="ProgressBar" parent="." unique_id=728229679]
 offset_left = -56.0
 offset_top = -56.0

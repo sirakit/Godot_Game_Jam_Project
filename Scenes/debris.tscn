@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://dmtdyso0b36d"]
+
+[ext_resource type="Script" uid="uid://csqpanbdyjcw1" path="res://Scripts/debris.gd" id="1_el654"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_xepy2"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_f588a"]
+radius = 31.304955
+
+[node name="Debris" type="Node2D" unique_id=324344930]
+script = ExtResource("1_el654")
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=507535093]
+position = Vector2(1.9073486e-06, 3.8146973e-06)
+scale = Vector2(2.88, 2.625)
+polygon = PackedVector2Array(-10.416666, -1.4532179e-06, 0, 13, 11.111109, 0.3809509, -6.6227375e-07, -10.666668)
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="." unique_id=568328590]
+position = Vector2(1.25, 3.4999995)
+scale = Vector2(42.5, 43)
+mesh = SubResource("QuadMesh_xepy2")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=359759300]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=873787475]
+position = Vector2(1, 3.0000005)
+rotation = 2.4748769
+scale = Vector2(0.9999999, 0.9999999)
+shape = SubResource("CircleShape2D_f588a")

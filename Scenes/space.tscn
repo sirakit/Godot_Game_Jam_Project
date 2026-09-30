@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://div5cflstw8r3" path="res://Scenes/meteorite.tscn" id="3_wnfdr"]
 [ext_resource type="Script" uid="uid://b0fea6y0ro1vu" path="res://Scripts/meteorite_spawner.gd" id="4_va77k"]
 [ext_resource type="Script" uid="uid://0i87qthaqe4o" path="res://Scripts/UI.gd" id="5_bj3u6"]
+[ext_resource type="Script" uid="uid://du8drdwy5a07y" path="res://Scripts/debris_spawner.gd" id="6_1fjq1"]
+[ext_resource type="PackedScene" uid="uid://dmtdyso0b36d" path="res://Scenes/debris.tscn" id="7_kqa63"]
 
 [node name="Space" type="Node2D" unique_id=1548029567]
 script = ExtResource("1_va77k")
@@ -48,6 +50,10 @@ position = Vector2(613, 877)
 
 [node name="Meteorite8" parent="MeteoriteSpawner" unique_id=338698535 instance=ExtResource("3_wnfdr")]
 position = Vector2(199, 612)
+
+[node name="DebrisSpawner" type="Node2D" parent="." unique_id=1859819762]
+script = ExtResource("6_1fjq1")
+debris_scene = ExtResource("7_kqa63")
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=1442621378]
 
