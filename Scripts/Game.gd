@@ -6,7 +6,17 @@ signal points_changed(value)
 signal artifacts_changed(count)
 signal trip_ended()
 signal upgrades_changed()                      
-signal perfect_extraction()
+signal collection_changed()
+signal collection_completed()
+signal perfect_extraction()        
+
+const ALL_ARTIFACT_NAMES := [
+	"Basalt Shard", "Iron Nodule", "Quartz Cluster",
+	"Carbon Chondrite", "Nickel Vein", "Silica Geode",
+	"Sapphire Core", "Voidglass Crystal", "Star Iron Ingot", "Ancient Alloy Relic",
+]
+
+var discovered_artifacts: Dictionary = {}   # ชื่อ -> true
 
 var oxygen_max: float = 100.0
 var oxygen: float = 100.0
@@ -55,6 +65,13 @@ func dock() -> void:
 func add_artifact(art_data: Dictionary) -> void:
 	carried_artifacts.append(art_data)
 	artifacts_changed.emit(carried_artifacts.size())
+
+	var art_name: String = art_data.get("name", "")
+	if art_name != "" and not discovered_artifacts.has(art_name):
+		discovered_artifacts[art_name] = true
+		collection_changed.emit()
+		if discovered_artifacts.size() >= ALL_ARTIFACT_NAMES.size():
+			collection_completed.emit()
 
 func tick(delta: float) -> void:
 	if is_outside:
@@ -113,9 +130,14 @@ func reset_all() -> void:                        # ปุ่ม restart
 	total_earned = 0
 	carried_artifacts.clear()
 	is_outside = false
+	
 	for k in upgrade_levels.keys():
 		upgrade_levels[k] = 0
+	
+	discovered_artifacts.clear()
+	collection_changed.emit()
 	reset_trip()
 	points_changed.emit(points)
 	artifacts_changed.emit(0)
 	upgrades_changed.emit()
+	

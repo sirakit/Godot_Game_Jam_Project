@@ -21,3 +21,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		Game.reset_all()
 		get_tree().reload_current_scene()
+	if event is InputEventKey and event.pressed and event.keycode == KEY_C:
+		var log_panel := get_node("CanvasLayer2/UI/CollectionLog")
+		log_panel.visible = not log_panel.visible

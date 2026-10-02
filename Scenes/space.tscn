@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://0i87qthaqe4o" path="res://Scripts/UI.gd" id="5_bj3u6"]
 [ext_resource type="Script" uid="uid://du8drdwy5a07y" path="res://Scripts/debris_spawner.gd" id="6_1fjq1"]
 [ext_resource type="PackedScene" uid="uid://dmtdyso0b36d" path="res://Scenes/debris.tscn" id="7_kqa63"]
+[ext_resource type="Script" uid="uid://bsf5x6o7re4ep" path="res://Scripts/collection_log.gd" id="9_kqa63"]
 
 [node name="Space" type="Node2D" unique_id=1548029567]
 script = ExtResource("1_va77k")
@@ -65,6 +66,31 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("5_bj3u6")
+
+[node name="CollectionLog" type="PanelContainer" parent="CanvasLayer2/UI" unique_id=1398790707]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("9_kqa63")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer2/UI/CollectionLog" unique_id=1023058950]
+layout_mode = 2
+
+[node name="CountLabel" type="Label" parent="CanvasLayer2/UI/CollectionLog/VBox" unique_id=178568494]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="CanvasLayer2/UI/CollectionLog/VBox" unique_id=1215470313]
+layout_mode = 2
+columns = 2
 
 [node name="OxygenBar" type="ProgressBar" parent="CanvasLayer2/UI" unique_id=71382715]
 layout_mode = 1

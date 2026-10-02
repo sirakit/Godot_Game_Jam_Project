@@ -6,6 +6,9 @@ extends Node2D
 @export var max_alive: int = 26
 @export var spawn_interval: Vector2 = Vector2(1.5, 4.0)
 
+const COMMON_NAMES := ["Basalt Shard", "Iron Nodule", "Quartz Cluster", "Carbon Chondrite", "Nickel Vein", "Silica Geode"]
+const RARE_NAMES := ["Sapphire Core", "Voidglass Crystal", "Star Iron Ingot", "Ancient Alloy Relic"]
+
 @onready var ship: Node2D = get_node("../Ship")
 
 var _alive: int = 0
@@ -37,13 +40,14 @@ func _spawn_one() -> void:
 	if randf() < _v2_chance():
 		m.rock_integrity_max = 95.0              # แข็งกว่าเดิม ~3 เท่า
 		m.artifact_value = 40                    # มูลค่า 4 เท่า
-		m.artifact_name = "Rare Artifact"
+		m.artifact_name = RARE_NAMES.pick_random()
 		m.required_drill = 2.0                   # ต้องอัปเกรด Drill 1 ครั้งก่อนถึงจะขุดเต็มสปีด
 		m.rock_color = Color(0.55, 0.15, 0.85, 0.85)
 		m.drift_radius = 75.0                    # ขยับกว้างกว่า เล็งยากกว่า
 		m.drift_speed = 1.7
 		m.spin_speed = 0.6
 	else:
+		m.artifact_name = COMMON_NAMES.pick_random()
 		m.drift_radius = randf_range(25.0, 55.0)
 		m.drift_speed = randf_range(0.7, 1.3)
 
