@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cj6aa0vbpeelp"
-path="res://.godot/imported/pixelart_starfield.png-edcd6a5c26716856bb257997be3d5684.ctex"
+uid="uid://k32ladqicsvf"
+path="res://.godot/imported/Player_sprite.png-5792515bf76dc605c2bf042c2d8d1c75.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/pixelart_starfield.png"
-dest_files=["res://.godot/imported/pixelart_starfield.png-edcd6a5c26716856bb257997be3d5684.ctex"]
+source_file="res://Assets/sprites/player/Player_sprite.png"
+dest_files=["res://.godot/imported/Player_sprite.png-5792515bf76dc605c2bf042c2d8d1c75.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dgot5fi4rrske"
-path="res://.godot/imported/pixelart_starfield_diagonal_diffraction_spikes.png-6a5b950557803260520bd8b6a1847545.ctex"
+uid="uid://4q335xxs2p"
+path="res://.godot/imported/icon.svg-557a655d14ee53c97384f0011e6b858a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/pixelart_starfield_diagonal_diffraction_spikes.png"
-dest_files=["res://.godot/imported/pixelart_starfield_diagonal_diffraction_spikes.png-6a5b950557803260520bd8b6a1847545.ctex"]
+source_file="res://Assets/sprites/icon.svg"
+dest_files=["res://.godot/imported/icon.svg-557a655d14ee53c97384f0011e6b858a.ctex"]
 
 [params]
 
@@ -38,3 +38,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

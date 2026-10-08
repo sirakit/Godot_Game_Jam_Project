@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ct3awjdibwdkv"
-path="res://.godot/imported/pixelart_starfield_corona.png-ee359af85bc52a23d78e47d56ee60108.ctex"
+path="res://.godot/imported/pixelart_starfield_corona.png-de08950c6c437d5f901ef9fcdc0a301c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/pixelart_starfield_corona.png"
-dest_files=["res://.godot/imported/pixelart_starfield_corona.png-ee359af85bc52a23d78e47d56ee60108.ctex"]
+source_file="res://Assets/backgrounds/pixelart_starfield_corona.png"
+dest_files=["res://.godot/imported/pixelart_starfield_corona.png-de08950c6c437d5f901ef9fcdc0a301c.ctex"]
 
 [params]
 
