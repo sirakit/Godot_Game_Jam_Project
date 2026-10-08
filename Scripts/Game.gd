@@ -17,6 +17,7 @@ const ALL_ARTIFACT_NAMES := [
 ]
 
 var discovered_artifacts: Dictionary = {}   # ชื่อ -> true
+var thrust_speed_bonus: float = 0.0
 
 var oxygen_max: float = 100.0
 var oxygen: float = 100.0
@@ -109,6 +110,7 @@ func upgrade_chisel() -> void:
 func upgrade_tether() -> void:
 	if _buy("tether"):
 		tether_length_max += 500.0
+		thrust_speed_bonus += 100.0
 		tether_remaining = tether_length_max
 		tether_changed.emit(tether_remaining, tether_length_max)
 
@@ -123,6 +125,7 @@ func upgrade_income() -> void:
 func reset_all() -> void:                        # ปุ่ม restart 
 	oxygen_max = 100.0
 	tether_length_max = 500.0
+	thrust_speed_bonus = 0.0
 	chisel_strength = 1.0
 	drill_strength = 1.0
 	income_multiplier = 1.0

@@ -13,7 +13,7 @@ const UPGRADE_UI := {
 	"chisel": {"node": "BtnChisel", "label": "Chisel",
 		"desc": "Chisel strength +1. Breaks rock integrity faster on EVERY meteorite (common and rare)."},
 	"tether": {"node": "BtnTether", "label": "Tether",
-		"desc": "Max tether length +500px. Lets you fly farther from the ship before you hit the rope's limit."},
+		"desc": "Max tether length +500px and bonus speed +20px. Lets you fly farther from the ship before you hit the rope's limit."},
 	"drill":  {"node": "BtnDrill",  "label": "Drill",
 		"desc": "Drill strength +1. Rare (purple) meteorites need enough Drill or they mine 3x slower — upgrading Chisel does NOT help with this."},
 	"income": {"node": "BtnIncome", "label": "Contract",

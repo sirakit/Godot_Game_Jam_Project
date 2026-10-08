@@ -45,7 +45,7 @@ func _physics_process(delta: float) -> void:
 		Input.get_axis("move_up", "move_down")
 	)
 	if input_vec.length() > 0.0:
-		velocity += input_vec.normalized() * thrust_speed * delta
+		velocity += input_vec.normalized() * (thrust_speed + Game.thrust_speed_bonus) * delta
 	velocity *= damping
 	move_and_slide()
 
