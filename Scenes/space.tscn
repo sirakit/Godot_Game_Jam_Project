@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://bhb1vey30wsvl" path="res://Scenes/player.tscn" id="1_0ll74"]
 [ext_resource type="PackedScene" uid="uid://v5tj4dkrr3nd" path="res://Scenes/ship.tscn" id="1_2fo43"]
 [ext_resource type="Script" uid="uid://brueuaot3k5fq" path="res://Scripts/space.gd" id="1_va77k"]
+[ext_resource type="Texture2D" uid="uid://cj6aa0vbpeelp" path="res://Assets/backgrounds/pixelart_starfield.png" id="2_sg02i"]
 [ext_resource type="PackedScene" uid="uid://div5cflstw8r3" path="res://Scenes/meteorite.tscn" id="3_wnfdr"]
 [ext_resource type="Script" uid="uid://b0fea6y0ro1vu" path="res://Scripts/meteorite_spawner.gd" id="4_va77k"]
 [ext_resource type="Script" uid="uid://0i87qthaqe4o" path="res://Scripts/UI.gd" id="5_bj3u6"]
@@ -12,6 +13,16 @@
 
 [node name="Space" type="Node2D" unique_id=1548029567]
 script = ExtResource("1_va77k")
+
+[node name="Background" type="Parallax2D" parent="." unique_id=1332902306]
+scroll_scale = Vector2(0.3, 0.3)
+repeat_size = Vector2(320, 320)
+repeat_times = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="Background" unique_id=1346536537]
+position = Vector2(422, 365)
+texture = ExtResource("2_sg02i")
+centered = false
 
 [node name="Ship" parent="." unique_id=1198528667 instance=ExtResource("1_2fo43")]
 position = Vector2(571, 531)
