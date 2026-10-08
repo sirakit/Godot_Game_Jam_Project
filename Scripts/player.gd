@@ -113,7 +113,13 @@ func _update_target() -> void:
 			nearest_dist = d
 			nearest = meteor
 
-	# กันสลับเป้าถี่ๆ ตอนสองลูกอยู่ใกล้ผู้เล่นพอๆ กัน 
+	# ไม่มีลูกไหนอยู่ในระยะเลย ต้องเคลียร์เป้าทันที ไม่ผ่าน hysteresis ด้านล่าง (แก้บั๊กขุดค้าง)
+	if nearest == null:
+		if current_meteorite != null:
+			_set_target(null)
+		return
+
+	# กันสลับเป้าถี่ๆ ตอนสองลูกอยู่ใกล้ผู้เล่นพอๆ กัน (เทียบกันได้ก็ต่อเมื่อมีทั้งคู่จริง)
 	if is_instance_valid(current_meteorite) and nearest != current_meteorite:
 		var current_dist := global_position.distance_to(current_meteorite.global_position)
 		if current_dist - nearest_dist < 20.0:
