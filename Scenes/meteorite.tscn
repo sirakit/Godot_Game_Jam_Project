@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://div5cflstw8r3"]
 
 [ext_resource type="Script" uid="uid://c031lodxelwq5" path="res://Scripts/meteorite.gd" id="1_7v1jx"]
+[ext_resource type="Texture2D" uid="uid://slhu6aovr25s" path="res://Assets/sprites/meteorites/meteorite_1.webp" id="2_yk4mi"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xepy2"]
 radius = 53.009434
@@ -13,6 +14,11 @@ position = Vector2(-3.0000021, 0.99999815)
 scale = Vector2(1.9361702, 1.9574468)
 color = Color(0.050980393, 0.06666667, 0.46666667, 0.8)
 polygon = PackedVector2Array(-11, -16, 9, -25, 12, -17, 25, -11, 25, 6, 18, 18, 5, 22, 4, 16, -6, 16, -10, 20, -15, 12, -22, -1)
+
+[node name="Sprite2D" type="Sprite2D" parent="RockShape" unique_id=176198367]
+position = Vector2(-6.197802, 4.0869575)
+scale = Vector2(0.20785452, 0.20559524)
+texture = ExtResource("2_yk4mi")
 
 [node name="Artifact" type="Polygon2D" parent="." unique_id=1367278947]
 position = Vector2(-20.76739, 8.843075)

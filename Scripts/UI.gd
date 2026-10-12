@@ -18,6 +18,8 @@ const UPGRADE_UI := {
 		"desc": "Drill strength +1. Rare (purple) meteorites need enough Drill or they mine 3x slower — upgrading Chisel does NOT help with this."},
 	"income": {"node": "BtnIncome", "label": "Contract",
 		"desc": "Income multiplier +25%. Applies to every artifact's value when you dock and hand it in."},
+	"speed":  {"node": "BtnSpeed",  "label": "Thrusters",
+		"desc": "Movement speed +75. Lets you reach distant meteorites faster and save oxygen."},
 }
 
 func _ready() -> void:
@@ -34,6 +36,7 @@ func _ready() -> void:
 	upgrade_buttons.get_node("BtnTether").pressed.connect(Game.upgrade_tether)
 	upgrade_buttons.get_node("BtnDrill").pressed.connect(Game.upgrade_drill)
 	upgrade_buttons.get_node("BtnIncome").pressed.connect(Game.upgrade_income)
+	upgrade_buttons.get_node("BtnSpeed").pressed.connect(Game.upgrade_speed)
 
 	for btn in upgrade_buttons.get_children():
 		if btn is Button:

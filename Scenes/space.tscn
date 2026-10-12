@@ -198,3 +198,7 @@ text = "Drill"
 [node name="BtnIncome" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=1716644634]
 layout_mode = 2
 text = "Contract"
+
+[node name="BtnSpeed" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=206472473]
+layout_mode = 2
+text = "Thrusters"

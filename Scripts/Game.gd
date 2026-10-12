@@ -8,7 +8,8 @@ signal trip_ended()
 signal upgrades_changed()                      
 signal collection_changed()
 signal collection_completed()
-signal perfect_extraction()        
+signal perfect_extraction()
+		
 
 const ALL_ARTIFACT_NAMES := [
 	"Basalt Shard", "Iron Nodule", "Quartz Cluster",
@@ -35,8 +36,8 @@ var total_earned: int = 0                       # สถิติสะสม �
 var carried_artifacts: Array = []
 var is_outside: bool = false
 
-var upgrade_levels := {"oxygen": 0, "chisel": 0, "tether": 0, "drill": 0, "income": 0}
-const UPGRADE_BASE_COST := {"oxygen": 20.0, "chisel": 15.0, "tether": 10.0, "drill": 30.0, "income": 25.0}
+var upgrade_levels := {"oxygen": 0, "chisel": 0, "tether": 0, "drill": 0, "income": 0, "speed": 0}
+const UPGRADE_BASE_COST := {"oxygen": 20.0, "chisel": 15.0, "tether": 10.0, "drill": 30.0, "income": 25.0, "speed": 20.0}
 const UPGRADE_COST_GROWTH := 1.5                # ราคาโต 50% ทุกเลเวล
 
 func get_upgrade_cost(id: String) -> int:
@@ -121,6 +122,10 @@ func upgrade_drill() -> void:
 func upgrade_income() -> void:
 	if _buy("income"):
 		income_multiplier += 0.25
+
+func upgrade_speed() -> void:
+	if _buy("speed"):
+		thrust_speed_bonus += 75.0
 
 func reset_all() -> void:                        # ปุ่ม restart 
 	oxygen_max = 100.0
