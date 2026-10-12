@@ -3,6 +3,17 @@ extends CharacterBody2D
 @export var thrust_speed: float = 600.0
 @export var damping: float = 0.92
 @export var retract_speed_mult: float = 2.0
+@export var hammer_rest_deg: float = -80.0
+@export var hammer_strike_deg: float = 0.0
+@export var hammer_lift_deg: float = -35.0
+@export var swing_interval: float = 0.1
+
+@onready var tools: Node2D = $Tools_Node2D
+@onready var hammer_pivot: Node2D = $Tools_Node2D/HammerPivot_Node2D
+
+var _swing_timer: float = 0.0
+var _hammer_down: bool = true
+var _was_chiseling: bool = false
 
 var ship_position: Vector2 = Vector2.ZERO
 var docked: bool = true
@@ -17,6 +28,7 @@ func _ready() -> void:
 	add_to_group("player")                       # ให้ ship.gd หาเจอ
 	detect_area.area_entered.connect(_on_area_entered)
 	detect_area.area_exited.connect(_on_area_exited)
+	hammer_pivot.rotation_degrees = hammer_rest_deg #For Chiseling animation
 
 func set_ship_position(pos: Vector2) -> void:
 	ship_position = pos
@@ -132,3 +144,32 @@ func _set_target(meteor: Node2D) -> void:
 	if is_instance_valid(current_meteorite) and current_meteorite != meteor:
 		current_meteorite.set_targeted(false)     
 	current_meteorite = meteor
+
+func _process(delta: float) -> void:
+	tools.visible = not docked
+
+	var chiseling := (
+		not docked
+		and not being_retracted
+		and is_instance_valid(current_meteorite)
+		and Input.is_action_pressed("chisel")
+	)
+	_update_hammer(delta, chiseling)
+
+func _update_hammer(delta: float, chiseling: bool) -> void:
+	if chiseling:
+		if not _was_chiseling:
+			_hammer_down = true
+			_swing_timer = 0.0
+			hammer_pivot.rotation_degrees = hammer_strike_deg
+		else:
+			_swing_timer += delta
+			if _swing_timer >= swing_interval:
+				_swing_timer -= swing_interval
+				_hammer_down = not _hammer_down
+				hammer_pivot.rotation_degrees = \
+					hammer_strike_deg if _hammer_down else hammer_lift_deg
+	else:
+		hammer_pivot.rotation_degrees = hammer_rest_deg
+
+	_was_chiseling = chiseling
