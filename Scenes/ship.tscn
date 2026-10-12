@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://v5tj4dkrr3nd"]
 
 [ext_resource type="Script" uid="uid://r31oaanmqunx" path="res://Scripts/ship.gd" id="1_78pfh"]
+[ext_resource type="Texture2D" uid="uid://crnpg7ybfulpc" path="res://Assets/sprites/ship/ship.png" id="2_4qyt1"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_xepy2"]
 size = Vector2(250, 100)
@@ -14,7 +15,14 @@ radius = 180.0
 [node name="Ship" type="Node2D" unique_id=1198528667]
 script = ExtResource("1_78pfh")
 
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1989814624]
+position = Vector2(1.9073486e-06, -4.7683716e-07)
+scale = Vector2(0.3125, 0.3125)
+texture = ExtResource("2_4qyt1")
+offset = Vector2(-20, -9)
+
 [node name="Hull" type="ColorRect" parent="." unique_id=743925368]
+visible = false
 offset_left = -59.0
 offset_top = -63.0
 offset_right = 59.0
@@ -24,12 +32,14 @@ color = Color(0, 0, 0.15294118, 1)
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=741429036]
 
 [node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D" unique_id=1034182593]
+visible = false
 position = Vector2(2, 114)
 mesh = SubResource("QuadMesh_xepy2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=74865768]
-position = Vector2(2, 114)
+position = Vector2(1, -1)
 shape = SubResource("RectangleShape2D_xepy2")
+disabled = true
 
 [node name="DockArea" type="Area2D" parent="." unique_id=1486512395]
 
