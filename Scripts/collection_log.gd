@@ -28,4 +28,4 @@ func _refresh() -> void:
 	count_label.text = "Collection: %d / %d" % [Game.discovered_artifacts.size(), Game.ALL_ARTIFACT_NAMES.size()]
 
 func _on_completed() -> void:
-	count_label.text += "   — ALL CATALOGUED! 🎉"
+	count_label.text += "   — ALL CATALOGUED! "
