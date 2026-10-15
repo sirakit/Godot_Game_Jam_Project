@@ -10,14 +10,14 @@ size = Vector2(250, 100)
 size = Vector2(250, 100)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xepy2"]
-radius = 180.0
+radius = 243.05144
 
 [node name="Ship" type="Node2D" unique_id=1198528667]
 script = ExtResource("1_78pfh")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1989814624]
-position = Vector2(1.9073486e-06, -4.7683716e-07)
-scale = Vector2(0.3125, 0.3125)
+position = Vector2(-0.9999924, 0)
+scale = Vector2(0.41447803, 0.41447803)
 texture = ExtResource("2_4qyt1")
 offset = Vector2(-20, -9)
 

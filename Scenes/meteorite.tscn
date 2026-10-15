@@ -4,14 +4,14 @@
 [ext_resource type="Texture2D" uid="uid://slhu6aovr25s" path="res://Assets/sprites/meteorites/meteorite_1.webp" id="2_yk4mi"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xepy2"]
-radius = 53.009434
+radius = 45.01111
 
 [node name="Meteorite" type="Node2D" unique_id=205495736]
 script = ExtResource("1_7v1jx")
 
 [node name="RockShape" type="Polygon2D" parent="." unique_id=1296786105]
-position = Vector2(-3.0000021, 0.99999815)
-scale = Vector2(1.9361702, 1.9574468)
+position = Vector2(-4.4870987, 6.702131)
+scale = Vector2(1.4594839, 1.4680852)
 color = Color(0.050980393, 0.06666667, 0.46666667, 0.8)
 polygon = PackedVector2Array(-11, -16, 9, -25, 12, -17, 25, -11, 25, 6, 18, 18, 5, 22, 4, 16, -6, 16, -10, 20, -15, 12, -22, -1)
 
@@ -21,8 +21,8 @@ scale = Vector2(0.20785452, 0.20559524)
 texture = ExtResource("2_yk4mi")
 
 [node name="Artifact" type="Polygon2D" parent="." unique_id=1367278947]
-position = Vector2(-20.76739, 8.843075)
-scale = Vector2(0.65760857, 0.6692307)
+position = Vector2(-20.571737, 9.515382)
+scale = Vector2(0.60326076, 0.59615386)
 color = Color(0.4627451, 0.03137255, 0.7294118, 1)
 polygon = PackedVector2Array(5.200012, 9.200005, 77.20001, -10, 72, -13, 25.200012, -42.799995, 5.200012, -25.999992, 3.600006, -7.599991)
 uv = PackedVector2Array(5.200012, 9.200005, 77.20001, -10, 72, -13, 25.200012, -42.799995, 5.200012, -25.999992, 3.600006, -7.599991)
@@ -30,6 +30,7 @@ uv = PackedVector2Array(5.200012, 9.200005, 77.20001, -10, 72, -13, 25.200012, -
 [node name="Area2D" type="Area2D" parent="." unique_id=1677021760]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1153831540]
+position = Vector2(0, 7)
 shape = SubResource("CircleShape2D_xepy2")
 
 [node name="InfoLabel" type="Label" parent="." unique_id=862681611]

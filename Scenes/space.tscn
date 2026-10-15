@@ -46,10 +46,10 @@ position = Vector2(336, 169)
 position = Vector2(161, 915)
 
 [node name="Meteorite5" parent="MeteoriteSpawner" unique_id=619376306 instance=ExtResource("3_wnfdr")]
-position = Vector2(900, 697)
+position = Vector2(900, 717)
 
 [node name="Meteorite6" parent="MeteoriteSpawner" unique_id=1707200877 instance=ExtResource("3_wnfdr")]
-position = Vector2(805, 344)
+position = Vector2(920, 343)
 
 [node name="Meteorite7" parent="MeteoriteSpawner" unique_id=889060345 instance=ExtResource("3_wnfdr")]
 position = Vector2(1219, 344)

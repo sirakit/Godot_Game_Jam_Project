@@ -43,17 +43,17 @@ shape = SubResource("CircleShape2D_xepy2")
 [node name="Tools_Node2D" type="Node2D" parent="." unique_id=2052607886]
 
 [node name="Chisel_Sprite2D" type="Sprite2D" parent="Tools_Node2D" unique_id=722330875]
-position = Vector2(-35, 0.99999905)
+position = Vector2(-24, -6.0000005)
 rotation = -2.5651128
-scale = Vector2(0.11269946, 0.11269947)
+scale = Vector2(0.080317646, 0.07972531)
 texture = ExtResource("3_vgqql")
 
 [node name="HammerPivot_Node2D" type="Node2D" parent="Tools_Node2D" unique_id=1407397289]
 position = Vector2(15, -12)
 
 [node name="Hammer_Sprite2D" type="Sprite2D" parent="Tools_Node2D/HammerPivot_Node2D" unique_id=1842906985]
-position = Vector2(1.9073486e-06, -4.7683716e-07)
+position = Vector2(-1.0000002, 1)
 rotation = -0.010060906
-scale = Vector2(0.10505318, 0.105053194)
+scale = Vector2(0.09029286, 0.08481083)
 texture = ExtResource("4_fkybt")
 offset = Vector2(24.729218, -202.6696)
