@@ -2,6 +2,11 @@
 
 [ext_resource type="Script" uid="uid://cmb3m4omvhupi" path="res://Scripts/main_menu.gd" id="1_28flt"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_xepy2"]
+font_size = 120
+outline_color = Color(0.5457783, 0.034365837, 0.48213863, 1)
+shadow_size = 136
+
 [node name="Main_menu" type="Control" unique_id=908311495]
 layout_mode = 3
 anchors_preset = 8
@@ -9,27 +14,36 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -96.0
-offset_top = -26.0
-offset_right = -96.0
-offset_bottom = -26.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_28flt")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1218452253]
+[node name="Title" type="Label" parent="." unique_id=1043887500]
 layout_mode = 1
-offset_left = -31.0
-offset_top = -33.0
-offset_right = 255.0
-offset_bottom = 33.0
-alignment = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -404.0
+offset_top = -238.0
+offset_right = 405.0
+offset_bottom = -73.0
+grow_horizontal = 2
+text = "Tertherbound"
+label_settings = SubResource("LabelSettings_xepy2")
 
-[node name="BtnStart" type="Button" parent="VBoxContainer" unique_id=1289913430]
-layout_mode = 2
+[node name="BtnStart" type="Button" parent="." unique_id=1289913430]
+layout_mode = 0
+offset_left = -142.0
+offset_top = -16.0
+offset_right = 144.0
+offset_bottom = 51.0
 text = "Start"
 
-[node name="BtnQuit" type="Button" parent="VBoxContainer" unique_id=1179937345]
+[node name="BtnQuit" type="Button" parent="." unique_id=1179937345]
 custom_minimum_size = Vector2(11, 11)
-layout_mode = 2
+layout_mode = 0
+offset_left = -68.0
+offset_top = 85.0
+offset_right = 66.0
+offset_bottom = 147.0
 text = "Quit"

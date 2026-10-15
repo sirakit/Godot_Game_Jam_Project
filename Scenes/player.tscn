@@ -18,7 +18,7 @@ hammer_rest_deg = 0.0
 hammer_strike_deg = -54.0
 hammer_lift_deg = -32.0
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=872887285]
+[node name="Player_Sprite2D" type="Sprite2D" parent="." unique_id=872887285]
 scale = Vector2(0.059469692, 0.06851852)
 texture = ExtResource("2_cvnsp")
 
