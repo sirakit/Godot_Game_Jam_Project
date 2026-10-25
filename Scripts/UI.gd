@@ -98,7 +98,7 @@ func _refresh_buttons() -> void:
 			continue
 		var cost := Game.get_upgrade_cost(id)
 		# "→ Lv.N" คือเลเวลที่ "กำลังจะซื้อ" เลยไม่มีทางโชว์ Lv.0 อีกต่อไป (แก้บั๊กข้อ 2)
-		btn.text = "%s → Lv.%d (%d pt)" % [UPGRADE_UI[id]["label"], Game.upgrade_levels[id] + 1, cost]
+		btn.text = "%s > Lv.%d (%d pt)" % [UPGRADE_UI[id]["label"], Game.upgrade_levels[id] + 1, cost]
 		btn.tooltip_text = UPGRADE_UI[id]["desc"]
 		btn.disabled = Game.points < cost
 
