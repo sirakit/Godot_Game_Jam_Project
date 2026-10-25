@@ -9,13 +9,10 @@ signal upgrades_changed()
 signal collection_changed()
 signal collection_completed()
 signal perfect_extraction()
-		
+signal debris_hit()
 
-const ALL_ARTIFACT_NAMES := [
-	"Basalt Shard", "Iron Nodule", "Quartz Cluster",
-	"Carbon Chondrite", "Nickel Vein", "Silica Geode",
-	"Sapphire Core", "Voidglass Crystal", "Star Iron Ingot", "Ancient Alloy Relic",
-]
+
+var restart_progress: float = 0.0
 
 var discovered_artifacts: Dictionary = {}   # ชื่อ -> true
 var thrust_speed_bonus: float = 0.0
@@ -69,10 +66,11 @@ func add_artifact(art_data: Dictionary) -> void:
 	artifacts_changed.emit(carried_artifacts.size())
 
 	var art_name: String = art_data.get("name", "")
-	if art_name != "" and not discovered_artifacts.has(art_name):
+	# นับเข้าสมุดสะสมเฉพาะชื่อที่อยู่ในแคตตาล็อกจริง กัน "Unknown Artifact" มาดันตัวเลข
+	if ArtifactDB.is_valid(art_name) and not discovered_artifacts.has(art_name):
 		discovered_artifacts[art_name] = true
 		collection_changed.emit()
-		if discovered_artifacts.size() >= ALL_ARTIFACT_NAMES.size():
+		if discovered_artifacts.size() >= ArtifactDB.all_names().size():
 			collection_completed.emit()
 
 func tick(delta: float) -> void:
