@@ -1,12 +1,12 @@
 extends Node2D
 
-@export var debris_scene: PackedScene       # ลาก Scenes/debris.tscn มาใส่
-@export var spawn_radius: float = 1600.0
-@export var spawn_interval: Vector2 = Vector2(4.0, 9.0)
-@export var speed_range: Vector2 = Vector2(200.0, 340.0)
-@export var aim_spread_degrees: float = 35.0   # ยิงเฉียดๆ ไม่ตรงเป้าตลอด จะได้พอหลบได้
+@export var debris_scene: PackedScene
+@export var spawn_distance: Vector2 = Vector2(850.0, 1100.0)   # เกิดนอกจอ รอบตัวผู้เล่น (ไม่ใช่รอบยานแล้ว)
+@export var spawn_interval: Vector2 = Vector2(5.0, 9.0)
+@export var speed_range: Vector2 = Vector2(220.0, 360.0)
+@export var aim_spread_degrees: float = 12.0
 
-@onready var ship: Node2D = get_node("../Ship")
+@onready var player: CharacterBody2D = get_node("../Player")
 
 var _timer: float = 0.0
 
@@ -15,7 +15,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if not Game.is_outside:
-		return   # อยู่ในยานไม่มีเศษขยะมากวน
+		return
 	_timer -= delta
 	if _timer <= 0.0:
 		_spawn_one()
@@ -26,12 +26,18 @@ func _reset_timer() -> void:
 
 func _spawn_one() -> void:
 	var d := debris_scene.instantiate()
-	var spawn_angle := randf_range(0.0, TAU)
-	d.global_position = ship.global_position + Vector2(cos(spawn_angle), sin(spawn_angle)) * spawn_radius
+	var speed := randf_range(speed_range.x, speed_range.y)
+	var dist := randf_range(spawn_distance.x, spawn_distance.y)
+	var spawn_pos: Vector2 = player.global_position + Vector2.from_angle(randf_range(0.0, TAU)) * dist
 
-	var aim_angle: float = (ship.global_position - d.global_position).angle()
+	# เล็งนำหน้า: ทำนายว่าตอนเศษขยะไปถึง ผู้เล่นจะอยู่ตรงไหน
+	var travel_time := dist / speed
+	var predicted: Vector2 = player.global_position + player.velocity * travel_time
+	var aim_angle: float = (predicted - spawn_pos).angle()
 	aim_angle += deg_to_rad(randf_range(-aim_spread_degrees, aim_spread_degrees))
-	d.direction = Vector2.RIGHT.rotated(aim_angle)
-	d.speed = randf_range(speed_range.x, speed_range.y)
 
+	d.direction = Vector2.from_angle(aim_angle)
+	d.speed = speed
+	d.target = player
 	add_child(d)
+	d.global_position = spawn_pos

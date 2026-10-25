@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://du8drdwy5a07y" path="res://Scripts/debris_spawner.gd" id="6_1fjq1"]
 [ext_resource type="PackedScene" uid="uid://dmtdyso0b36d" path="res://Scenes/debris.tscn" id="7_kqa63"]
 [ext_resource type="Script" uid="uid://bsf5x6o7re4ep" path="res://Scripts/collection_log.gd" id="9_kqa63"]
+[ext_resource type="FontFile" uid="uid://dvugw8ql7pn07" path="res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf" id="11_0b4c6"]
 
 [node name="Space" type="Node2D" unique_id=1548029567]
 script = ExtResource("1_va77k")
@@ -36,33 +37,6 @@ position = Vector2(570, 534)
 script = ExtResource("4_va77k")
 meteorite_scene = ExtResource("3_wnfdr")
 
-[node name="Meteorite" parent="MeteoriteSpawner" unique_id=205495736 instance=ExtResource("3_wnfdr")]
-position = Vector2(189, 312)
-
-[node name="Meteorite3" parent="MeteoriteSpawner" unique_id=520735452 instance=ExtResource("3_wnfdr")]
-position = Vector2(336, 169)
-
-[node name="Meteorite4" parent="MeteoriteSpawner" unique_id=2000773038 instance=ExtResource("3_wnfdr")]
-position = Vector2(161, 915)
-
-[node name="Meteorite5" parent="MeteoriteSpawner" unique_id=619376306 instance=ExtResource("3_wnfdr")]
-position = Vector2(900, 717)
-
-[node name="Meteorite6" parent="MeteoriteSpawner" unique_id=1707200877 instance=ExtResource("3_wnfdr")]
-position = Vector2(920, 343)
-
-[node name="Meteorite7" parent="MeteoriteSpawner" unique_id=889060345 instance=ExtResource("3_wnfdr")]
-position = Vector2(1219, 344)
-
-[node name="Meteorite10" parent="MeteoriteSpawner" unique_id=878428046 instance=ExtResource("3_wnfdr")]
-position = Vector2(778, 134)
-
-[node name="Meteorite9" parent="MeteoriteSpawner" unique_id=861841668 instance=ExtResource("3_wnfdr")]
-position = Vector2(613, 877)
-
-[node name="Meteorite8" parent="MeteoriteSpawner" unique_id=338698535 instance=ExtResource("3_wnfdr")]
-position = Vector2(199, 612)
-
 [node name="DebrisSpawner" type="Node2D" parent="." unique_id=1859819762]
 script = ExtResource("6_1fjq1")
 debris_scene = ExtResource("7_kqa63")
@@ -74,9 +48,20 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 1.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("5_bj3u6")
+
+[node name="HitFlash" type="ColorRect" parent="CanvasLayer2/UI" unique_id=390677936]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0, 0, 1)
 
 [node name="CollectionLog" type="PanelContainer" parent="CanvasLayer2/UI" unique_id=1398790707]
 layout_mode = 1
@@ -98,6 +83,7 @@ layout_mode = 2
 
 [node name="CountLabel" type="Label" parent="CanvasLayer2/UI/CollectionLog/VBox" unique_id=178568494]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 
 [node name="Grid" type="GridContainer" parent="CanvasLayer2/UI/CollectionLog/VBox" unique_id=1215470313]
 layout_mode = 2
@@ -107,6 +93,7 @@ columns = 2
 layout_mode = 1
 offset_right = 278.0
 offset_bottom = 27.0
+theme_override_fonts/font = ExtResource("11_0b4c6")
 
 [node name="TetherBar" type="ProgressBar" parent="CanvasLayer2/UI" unique_id=1037017662]
 layout_mode = 1
@@ -117,12 +104,14 @@ offset_top = -288.0
 offset_right = 243.0
 offset_bottom = -261.0
 grow_vertical = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 
 [node name="PointsLabel" type="Label" parent="CanvasLayer2/UI" unique_id=474903319]
 layout_mode = 0
 offset_top = 144.0
 offset_right = 40.0
 offset_bottom = 167.0
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Credit:"
 
 [node name="ArtifactsLabel" type="Label" parent="CanvasLayer2/UI" unique_id=1775528617]
@@ -130,6 +119,7 @@ layout_mode = 0
 offset_top = 114.0
 offset_right = 40.0
 offset_bottom = 137.0
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Artifacts carried:"
 
 [node name="HintLabel" type="Label" parent="CanvasLayer2/UI" unique_id=946433765]
@@ -138,6 +128,7 @@ offset_left = -1.0
 offset_top = 79.0
 offset_right = 521.0
 offset_bottom = 102.0
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "[SPACE] hold to chisel (watch the HEAT)   [E] collect artifact   fly back to ship + [E] to hand in   [C] collection log"
 
 [node name="O2" type="Label" parent="CanvasLayer2/UI" unique_id=1986622478]
@@ -146,6 +137,7 @@ offset_left = 283.0
 offset_top = 3.0
 offset_right = 323.0
 offset_bottom = 26.0
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "O2"
 
 [node name="TETHER" type="Label" parent="CanvasLayer2/UI" unique_id=825865298]
@@ -154,6 +146,7 @@ offset_left = 247.0
 offset_top = 38.0
 offset_right = 287.0
 offset_bottom = 61.0
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "TETHER"
 
 [node name="PerfectLabel" type="Label" parent="CanvasLayer2/UI" unique_id=1855824627]
@@ -163,6 +156,7 @@ offset_left = 786.0
 offset_top = 174.0
 offset_right = 994.0
 offset_bottom = 197.0
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = " PERFECT EXTRACTION! "
 
 [node name="UpgradeButtons" type="HBoxContainer" parent="CanvasLayer2/UI" unique_id=1901410214]
@@ -181,24 +175,30 @@ grow_vertical = 0
 
 [node name="BtnOxygen" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=2136530782]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "O2 Tank"
 
 [node name="BtnChisel" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=1870545741]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Chisel"
 
 [node name="BtnTether" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=8391678]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Tether"
 
 [node name="BtnDrill" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=2131440032]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Drill"
 
 [node name="BtnIncome" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=1716644634]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Contract"
 
 [node name="BtnSpeed" type="Button" parent="CanvasLayer2/UI/UpgradeButtons" unique_id=206472473]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Thrusters"

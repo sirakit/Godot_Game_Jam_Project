@@ -4,8 +4,14 @@ extends Node2D
 @export var rock_integrity_max: float = 30.0
 @export var artifact_value: int = 10
 @export var artifact_name: String = "Unknown Artifact"
-@export var required_drill: float = 1.0        # V2 ต้องการค่านี้สูงกว่า
+@export var required_drill: float = 1.0
 @export var rock_color: Color = Color(0.05, 0.067, 0.467, 0.8)
+
+@export_group("Sprites")
+@export var rock_texture: Texture2D            # ว่าง = ใช้ภาพหินเดิมใน meteorite.tscn
+@export var rock_scale_mult: float = 1.0       # ปรับขนาดภาพหิน (V2 ใช้ 1.7 ดูหัวข้อ B.3)
+@export var artifact_display_size: float = 64.0   # แร่แสดงด้านยาวสุดกี่พิกเซล ไม่ว่าไฟล์จะใหญ่แค่ไหน
+@export var artifact_tint: Color = Color(0.4, 0.9, 1.0)   # ใช้กับลูกแก้วชั่วคราวเท่านั้น
 
 @export_group("Drift")
 @export var drift_enabled: bool = true
@@ -28,20 +34,30 @@ var damage_rate: float = 30.0
 var _home_position: Vector2
 var _drift_time: float = 0.0
 var _shake: float = 0.0
+var _rock_base_pos: Vector2
+var _artifact_final_scale: Vector2 = Vector2.ONE
 
-@onready var rock_sprite: Polygon2D = $RockShape
-@onready var artifact_sprite: Polygon2D = $Artifact
-@onready var extract_bar: ProgressBar = $ExtractBar       
-@onready var heat_bar: ProgressBar = $HeatBar             
-@onready var integrity_bar: ProgressBar = $IntegrityBar  
-@onready var hover_area: Area2D = $Area2D         
-@onready var info_label: Label = $InfoLabel         # ต้องเพิ่ม node นี้ 
+@onready var visual: Node2D = $Visual
+@onready var rock_shape: Polygon2D = $Visual/RockShape
+@onready var rock_sprite: Sprite2D = $Visual/RockShape/Sprite2D
+@onready var artifact_sprite: Sprite2D = $Visual/Artifact
+@onready var extract_bar: ProgressBar = $ExtractBar
+@onready var heat_bar: ProgressBar = $HeatBar
+@onready var integrity_bar: ProgressBar = $IntegrityBar
+@onready var hover_area: Area2D = $Area2D
+@onready var info_label: Label = $InfoLabel
 
 func _ready() -> void:
+	add_to_group("meteorites")                   # ให้ spawner นับ/เช็กระยะได้
+
+	# หินที่วางมือในซีนไม่ได้ตั้งชื่อ -> สุ่มชื่อ common ให้ (แก้ต้นเหตุของบั๊ก Collection log)
+	if not ArtifactDB.is_valid(artifact_name):
+		artifact_name = ArtifactDB.COMMON_NAMES.pick_random()
+
 	rock_integrity = rock_integrity_max
-	artifact_sprite.visible = false
-	rock_sprite.color = rock_color
 	_home_position = position
+	_rock_base_pos = rock_shape.position         # จำตำแหน่งตั้งต้น (เดิม shake รีเซ็ตเป็น 0,0 ทำให้ภาพกระตุกเลื่อน)
+	_apply_visuals()
 
 	extract_bar.min_value = 0.0
 	extract_bar.max_value = 1.0
@@ -55,6 +71,42 @@ func _ready() -> void:
 	hover_area.mouse_entered.connect(_on_mouse_entered)
 	hover_area.mouse_exited.connect(_on_mouse_exited)
 
+	# เกิดแบบค่อยๆ ชัด ไม่ให้หินโผล่พรวดกลางจอ
+	modulate.a = 0.0
+	create_tween().tween_property(self, "modulate:a", 1.0, 0.6)
+
+func _apply_visuals() -> void:
+	rock_shape.color = rock_color
+	if rock_texture != null:
+		rock_sprite.texture = rock_texture
+	rock_sprite.scale *= rock_scale_mult
+
+	artifact_sprite.visible = false
+	var tex: Texture2D = ArtifactDB.get_texture(artifact_name)
+	if tex != null:
+		artifact_sprite.texture = tex
+		artifact_sprite.modulate = Color.WHITE       # ไม่ทับสีงานของศิลปิน
+	else:
+		tex = _make_placeholder_orb()
+		artifact_sprite.texture = tex
+		artifact_sprite.modulate = artifact_tint     # ลูกแก้วชั่วคราว (ม่วงสำหรับ V2)
+	var longest := float(maxi(tex.get_width(), tex.get_height()))
+	_artifact_final_scale = Vector2.ONE * (artifact_display_size / longest)
+	artifact_sprite.scale = _artifact_final_scale
+
+func _make_placeholder_orb() -> Texture2D:
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(1, 1, 1, 0))
+	var t := GradientTexture2D.new()
+	t.gradient = g
+	t.fill = GradientTexture2D.FILL_RADIAL
+	t.fill_from = Vector2(0.5, 0.5)
+	t.fill_to = Vector2(1.0, 0.5)
+	t.width = 64
+	t.height = 64
+	return t
+
 func _process(delta: float) -> void:
 	if drift_enabled:
 		_drift_time += delta * drift_speed
@@ -62,14 +114,13 @@ func _process(delta: float) -> void:
 			sin(_drift_time * 1.3) * drift_radius,
 			cos(_drift_time) * drift_radius
 		)
-		rotation += spin_speed * delta
+	visual.rotation += spin_speed * delta        # หมุนเฉพาะภาพ ป้ายกับบาร์ไม่หมุนตาม
 
-	# สั่นตอนสกัด 
 	if _shake > 0.0:
 		_shake = max(0.0, _shake - delta * 8.0)
-		rock_sprite.position = Vector2(randf_range(-2, 2), randf_range(-2, 2)) * _shake
+		rock_shape.position = _rock_base_pos + Vector2(randf_range(-2, 2), randf_range(-2, 2)) * _shake
 	else:
-		rock_sprite.position = Vector2.ZERO
+		rock_shape.position = _rock_base_pos
 
 func _set_bars_visible(v: bool) -> void:
 	extract_bar.visible = v and not artifact_revealed
@@ -87,7 +138,6 @@ func chisel(delta: float, strength: float) -> void:
 	_shake = 1.0
 	_set_bars_visible(true)
 
-	# ถ้าสว่านยังไม่แรงพอสำหรับหินชนิดนี้ จะขุดได้แต่ช้ามาก
 	var effective := strength
 	if Game.drill_strength < required_drill:
 		effective *= 0.35
@@ -119,7 +169,6 @@ func cool_down(delta: float) -> void:
 func _update_bars() -> void:
 	heat_bar.value = heat
 	integrity_bar.value = artifact_health
-	#ปลอดภัย = ส้ม, อันตราย = แดงสด
 	var danger := heat_damage_threshold if not artifact_revealed else heat_damage_threshold * 0.6
 	heat_bar.modulate = Color(1.0, 0.25, 0.15) if heat > danger else Color(1.0, 0.65, 0.2)
 	integrity_bar.modulate = Color(1.0, 0.3, 0.3) if artifact_health < 50.0 else Color(0.4, 0.9, 1.0)
@@ -128,8 +177,13 @@ func _update_bars() -> void:
 
 func reveal_artifact() -> void:
 	artifact_revealed = true
-	rock_sprite.color = Color(0.25, 0.25, 0.25)
+	rock_shape.color = Color(0.25, 0.25, 0.25)
+	rock_sprite.modulate = Color(0.55, 0.55, 0.55)   # หินหม่นลง ให้แร่เด่นขึ้น
 	artifact_sprite.visible = true
+	artifact_sprite.scale = Vector2.ZERO             # แร่เด้งขึ้นมา
+	var tw := create_tween()
+	tw.tween_property(artifact_sprite, "scale", _artifact_final_scale, 0.25) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_set_bars_visible(true)
 
 func get_heat_ratio() -> float:
@@ -143,7 +197,7 @@ func collect() -> bool:
 
 		var is_perfect := artifact_health >= 95.0
 		if is_perfect:
-			final_value = int(final_value * 1.5)     # โบนัส ตอนคุณภาพ 95%+
+			final_value = int(final_value * 1.5)
 
 		Game.add_artifact({"name": artifact_name, "value": final_value})
 		if is_perfect:
@@ -162,22 +216,21 @@ func _on_mouse_exited() -> void:
 
 func _refresh_info_label() -> void:
 	var lines: Array[String] = []
+	var rare_tag := " (RARE)" if ArtifactDB.is_rare(artifact_name) else ""
 	if not artifact_revealed:
-		lines.append("Unidentified Meteorite")
+		lines.append("Unidentified Meteorite" + rare_tag)
 		lines.append("Integrity: %d%%" % int(100.0 - (rock_integrity / rock_integrity_max) * 100.0))
 	else:
-		lines.append(artifact_name)
+		lines.append(artifact_name + rare_tag)
 		lines.append("Quality so far: %d%%" % int(artifact_health))
 
 	if required_drill > 1.0:
 		if Game.drill_strength >= required_drill:
-			lines.append("✓ Your Drill is strong enough")
+			lines.append("[OK] Your Drill is strong enough")
 		else:
-			lines.append("✗ Needs Drill Lv.%d (you have Lv.%d) — will mine 3x slower" %
+			lines.append("[!] Needs Drill Lv.%d (you have Lv.%d) - mines 3x slower" %
 				[int(required_drill), int(Game.drill_strength)])
 	else:
 		lines.append("Any Chisel works fine on this one")
 
 	info_label.text = "\n".join(lines)
-	
-	

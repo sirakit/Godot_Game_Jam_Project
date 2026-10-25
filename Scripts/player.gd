@@ -10,6 +10,8 @@ extends CharacterBody2D
 
 @onready var tools: Node2D = $Tools_Node2D
 @onready var hammer_pivot: Node2D = $Tools_Node2D/HammerPivot_Node2D
+@onready var camera: Camera2D = $Camera2D
+var _cam_shake: float = 0.0
 
 var _swing_timer: float = 0.0
 var _hammer_down: bool = true
@@ -29,9 +31,14 @@ func _ready() -> void:
 	detect_area.area_entered.connect(_on_area_entered)
 	detect_area.area_exited.connect(_on_area_exited)
 	hammer_pivot.rotation_degrees = hammer_rest_deg #For Chiseling animation
+	z_index = 1                                   # ผู้เล่นกับค้อนอยู่เหนือหิน (Playtest 9)
+	Game.debris_hit.connect(_on_debris_hit)
 
 func set_ship_position(pos: Vector2) -> void:
 	ship_position = pos
+	
+func _on_debris_hit() -> void:
+	_cam_shake = 1.0
 
 func _physics_process(delta: float) -> void:
 	Game.tick(delta)
@@ -89,7 +96,14 @@ func _physics_process(delta: float) -> void:
 			current_meteorite.collect()
 			_set_target(null)
 	else:
-		current_meteorite = null                  # กัน error เมื่ออุกกาบาตถูก queue_free
+		current_meteorite = null
+						  # กัน error เมื่ออุกกาบาตถูก queue_free
+	if _cam_shake > 0.0:
+		_cam_shake = maxf(0.0, _cam_shake - delta * 2.5)
+		camera.offset = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * 14.0 * _cam_shake
+	else:
+		camera.offset = Vector2.ZERO
+				
 
 func undock() -> void:
 	docked = false

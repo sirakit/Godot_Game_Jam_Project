@@ -6,6 +6,8 @@ extends Control
 @onready var artifacts_label: Label = $ArtifactsLabel
 @onready var hint_label: Label = $HintLabel
 @onready var upgrade_buttons: HBoxContainer = $UpgradeButtons
+@onready var hit_flash: ColorRect = $HitFlash
+
 
 const UPGRADE_UI := {
 	"oxygen": {"node": "BtnOxygen", "label": "O2 Tank",
@@ -30,6 +32,9 @@ func _ready() -> void:
 	Game.artifacts_changed.connect(_on_artifacts_changed)
 	Game.upgrades_changed.connect(_refresh_buttons)
 	Game.perfect_extraction.connect(_on_perfect)
+	Game.debris_hit.connect(_on_debris_hit)
+	hit_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE   # สำคัญ: ไม่งั้นบล็อกเมาส์ ทำให้ hover หินไม่ติด
+	hit_flash.color = Color(0.543, 0.02, 0.02, 0.0)
 
 	upgrade_buttons.get_node("BtnOxygen").pressed.connect(Game.upgrade_oxygen)
 	upgrade_buttons.get_node("BtnChisel").pressed.connect(Game.upgrade_chisel)
@@ -56,10 +61,13 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	upgrade_buttons.visible = not Game.is_outside
+	if Game.restart_progress > 0.0:
+		hint_label.text = "Restarting... %d%%   (release R to cancel)" % int(Game.restart_progress * 100.0)
+		return
 	if Game.is_outside:
 		hint_label.text = "[SPACE] hold to chisel (watch the HEAT)   [E] collect artifact   fly back to ship + [E] to hand in   [C] collection log"
 	else:
-		hint_label.text = "[E] launch into space   |   hover a button to see what it does   |   [R] restart   [C] collection log"
+		hint_label.text = "[E] launch into space   |   hover a button to see what it does   |   hold [R] restart   [C] collection log"
 
 func _on_oxygen_changed(value, max_value) -> void:
 	oxygen_bar.max_value = max_value
@@ -74,6 +82,11 @@ func _on_tether_changed(value, max_value) -> void:
 func _on_points_changed(value) -> void:
 	points_label.text = "Credit: %d" % value
 	_refresh_buttons()
+	
+func _on_debris_hit() -> void:
+	hit_flash.color.a = 0.35
+	var tw := create_tween()
+	tw.tween_property(hit_flash, "color:a", 0.0, 0.4)
 
 func _on_artifacts_changed(count) -> void:
 	artifacts_label.text = "Artifacts carried: %d" % count

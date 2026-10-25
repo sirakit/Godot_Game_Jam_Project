@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://c031lodxelwq5" path="res://Scripts/meteorite.gd" id="1_7v1jx"]
 [ext_resource type="Texture2D" uid="uid://slhu6aovr25s" path="res://Assets/sprites/meteorites/meteorite_1.webp" id="2_yk4mi"]
+[ext_resource type="Texture2D" uid="uid://bxhe8j72fuvf3" path="res://Assets/sprites/artifacts/quartz_cluster.png" id="3_fhcg8"]
+[ext_resource type="FontFile" uid="uid://dvugw8ql7pn07" path="res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf" id="4_t7kdh"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xepy2"]
 radius = 45.01111
@@ -9,23 +11,22 @@ radius = 45.01111
 [node name="Meteorite" type="Node2D" unique_id=205495736]
 script = ExtResource("1_7v1jx")
 
-[node name="RockShape" type="Polygon2D" parent="." unique_id=1296786105]
+[node name="Visual" type="Node2D" parent="." unique_id=1519904898]
+
+[node name="RockShape" type="Polygon2D" parent="Visual" unique_id=1296786105]
 position = Vector2(-4.4870987, 6.702131)
 scale = Vector2(1.4594839, 1.4680852)
 color = Color(0.050980393, 0.06666667, 0.46666667, 0.8)
 polygon = PackedVector2Array(-11, -16, 9, -25, 12, -17, 25, -11, 25, 6, 18, 18, 5, 22, 4, 16, -6, 16, -10, 20, -15, 12, -22, -1)
 
-[node name="Sprite2D" type="Sprite2D" parent="RockShape" unique_id=176198367]
+[node name="Sprite2D" type="Sprite2D" parent="Visual/RockShape" unique_id=176198367]
 position = Vector2(-6.197802, 4.0869575)
 scale = Vector2(0.20785452, 0.20559524)
 texture = ExtResource("2_yk4mi")
 
-[node name="Artifact" type="Polygon2D" parent="." unique_id=1367278947]
-position = Vector2(-20.571737, 9.515382)
-scale = Vector2(0.60326076, 0.59615386)
-color = Color(0.4627451, 0.03137255, 0.7294118, 1)
-polygon = PackedVector2Array(5.200012, 9.200005, 77.20001, -10, 72, -13, 25.200012, -42.799995, 5.200012, -25.999992, 3.600006, -7.599991)
-uv = PackedVector2Array(5.200012, 9.200005, 77.20001, -10, 72, -13, 25.200012, -42.799995, 5.200012, -25.999992, 3.600006, -7.599991)
+[node name="Artifact" type="Sprite2D" parent="Visual" unique_id=192892302]
+scale = Vector2(0.0570652, 0.05802283)
+texture = ExtResource("3_fhcg8")
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1677021760]
 
@@ -38,12 +39,14 @@ offset_left = 39.0
 offset_top = -67.0
 offset_right = 79.0
 offset_bottom = -44.0
+theme_override_fonts/font = ExtResource("4_t7kdh")
 
 [node name="ExtractBar" type="ProgressBar" parent="." unique_id=728229679]
 offset_left = -56.0
 offset_top = -56.0
 offset_right = -52.0
 offset_bottom = -29.0
+theme_override_fonts/font = ExtResource("4_t7kdh")
 fill_mode = 3
 show_percentage = false
 
@@ -52,6 +55,7 @@ offset_left = -45.0
 offset_top = -56.0
 offset_right = -41.0
 offset_bottom = -29.0
+theme_override_fonts/font = ExtResource("4_t7kdh")
 fill_mode = 3
 show_percentage = false
 
@@ -60,5 +64,6 @@ offset_left = -34.0
 offset_top = -56.0
 offset_right = -30.0
 offset_bottom = -29.0
+theme_override_fonts/font = ExtResource("4_t7kdh")
 fill_mode = 3
 show_percentage = false
