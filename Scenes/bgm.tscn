@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://cwqvera8a83a8"]
+
+[ext_resource type="AudioStream" uid="uid://chcut6i505q7i" path="res://Assets/audio/music/Audio_AmbientSound.1.mp3" id="1_2kasm"]
+
+[node name="BGM" type="AudioStreamPlayer2D" unique_id=2042794311]
+stream = ExtResource("1_2kasm")
+autoplay = true
+max_distance = 6000.0
