@@ -1,10 +1,14 @@
 extends Node2D
 
+const HEAVY_ROCK_PATH := "res://Assets/sprites/meteorites/meteorite_2.png"
+const HEAVY_ROCK_FIX := 1.5        # ตัวหินใน meteorite_2.png เล็กกว่า meteorite_1 อยู่ ~1.5 เท่า (185 px vs 277 px)
+
 @export_group("Artifact")
 @export var rock_integrity_max: float = 30.0
 @export var artifact_value: int = 10
 @export var artifact_name: String = "Unknown Artifact"
-@export var required_drill: float = 1.0
+@export var tier: int = 0          # 0 = ให้เกมเลือกจากระยะห่างยาน (หินที่วางมือในซีน)
+var defense: float = 1.0
 @export var rock_color: Color = Color(0.05, 0.067, 0.467, 0.8)
 
 @export_group("Sprites")
@@ -51,8 +55,10 @@ func _ready() -> void:
 	add_to_group("meteorites")                   # ให้ spawner นับ/เช็กระยะได้
 
 	# หินที่วางมือในซีนไม่ได้ตั้งชื่อ -> สุ่มชื่อ common ให้ (แก้ต้นเหตุของบั๊ก Collection log)
-	if not ArtifactDB.is_valid(artifact_name):
-		artifact_name = ArtifactDB.COMMON_NAMES.pick_random()
+	if tier <= 0:
+		tier = _auto_tier()
+	_apply_tier()
+	artifact_name = ArtifactDB.COMMON_NAMES.pick_random()
 
 	rock_integrity = rock_integrity_max
 	_home_position = position
@@ -74,6 +80,31 @@ func _ready() -> void:
 	# เกิดแบบค่อยๆ ชัด ไม่ให้หินโผล่พรวดกลางจอ
 	modulate.a = 0.0
 	create_tween().tween_property(self, "modulate:a", 1.0, 0.6)
+	
+func _auto_tier() -> int:
+	var ship := get_node_or_null("../../Ship") as Node2D
+	if ship == null:
+		return 1
+	return MeteoriteTiers.pick_tier(MeteoriteTiers.zone_of(global_position.distance_to(ship.global_position)))
+
+func _apply_tier() -> void:
+	var i := clampi(tier, 1, 10) - 1
+	rock_integrity_max = MeteoriteTiers.HP[i]
+	defense = MeteoriteTiers.DEFENSE[i]
+	artifact_value = MeteoriteTiers.VALUE[i]
+	artifact_name = MeteoriteTiers.artifact_name(tier)
+	heat_gain_rate = 40.0 * MeteoriteTiers.HEAT[i]
+	rock_color = MeteoriteTiers.TINTS[i]
+	artifact_tint = MeteoriteTiers.TINTS[i].lightened(0.3)
+	rock_scale_mult = MeteoriteTiers.SIZE[i]
+	hover_area.scale = Vector2.ONE * MeteoriteTiers.SIZE[i]       # วงตรวจจับโตตามขนาดหิน
+	if tier >= 7:                                                 # tier 7-10 (drill-able) ใช้ภาพหินอีกแบบ
+		rock_scale_mult *= HEAVY_ROCK_FIX
+		if ResourceLoader.exists(HEAVY_ROCK_PATH):
+			rock_texture = load(HEAVY_ROCK_PATH) as Texture2D
+	drift_radius = 30.0 + 5.0 * tier                              # tier สูง ลอยกว้างและเร็วขึ้น เล็งยากขึ้น
+	drift_speed = 0.8 + 0.1 * tier
+	spin_speed = 0.2 + 0.04 * tier
 
 func _apply_visuals() -> void:
 	rock_shape.color = rock_color
@@ -138,12 +169,9 @@ func chisel(delta: float, strength: float) -> void:
 	_shake = 1.0
 	_set_bars_visible(true)
 
-	var effective := strength
-	if Game.drill_strength < required_drill:
-		effective *= 0.35
-		extract_bar.modulate = Color(1.0, 0.4, 0.4)
-	else:
-		extract_bar.modulate = Color.WHITE
+	var mult := MeteoriteTiers.defense_multiplier(tier, Game.drill_strength)
+	var effective := strength * mult
+	extract_bar.modulate = Color.WHITE if mult >= 0.999 else Color(1.0, 0.4, 0.4)
 
 	if not artifact_revealed:
 		rock_integrity -= effective * 10.0 * delta
@@ -216,21 +244,15 @@ func _on_mouse_exited() -> void:
 
 func _refresh_info_label() -> void:
 	var lines: Array[String] = []
-	var rare_tag := " (RARE)" if ArtifactDB.is_rare(artifact_name) else ""
 	if not artifact_revealed:
-		lines.append("Unidentified Meteorite" + rare_tag)
+		lines.append("Tier %d Meteorite" % tier)
 		lines.append("Integrity: %d%%" % int(100.0 - (rock_integrity / rock_integrity_max) * 100.0))
 	else:
-		lines.append(artifact_name + rare_tag)
+		lines.append("Tier %d - %s" % [tier, artifact_name])
 		lines.append("Quality so far: %d%%" % int(artifact_health))
-
-	if required_drill > 1.0:
-		if Game.drill_strength >= required_drill:
-			lines.append("[OK] Your Drill is strong enough")
-		else:
-			lines.append("[!] Needs Drill Lv.%d (you have Lv.%d) - mines 3x slower" %
-				[int(required_drill), int(Game.drill_strength)])
+	var mult := MeteoriteTiers.defense_multiplier(tier, Game.drill_strength)
+	if mult >= 0.999:
+		lines.append("[OK] DEF %.1f - your Drill is enough" % defense)
 	else:
-		lines.append("Any Chisel works fine on this one")
-
+		lines.append("[!] DEF %.1f - Drill %d: mining at %d%% speed" % [defense, int(Game.drill_strength), int(mult * 100.0)])
 	info_label.text = "\n".join(lines)

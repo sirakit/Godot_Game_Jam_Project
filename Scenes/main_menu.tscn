@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cmb3m4omvhupi" path="res://Scripts/main_menu.gd" id="1_28flt"]
 [ext_resource type="Texture2D" uid="uid://dgot5fi4rrske" path="res://Assets/backgrounds/pixelart_starfield_diagonal_diffraction_spikes.png" id="2_1ehe0"]
 [ext_resource type="FontFile" uid="uid://dvugw8ql7pn07" path="res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf" id="2_48xlc"]
+[ext_resource type="Texture2D" uid="uid://cj6aa0vbpeelp" path="res://Assets/backgrounds/pixelart_starfield.png" id="3_ce3w2"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_xepy2"]
 font = ExtResource("2_48xlc")
@@ -25,6 +26,16 @@ script = ExtResource("1_28flt")
 position = Vector2(0.5, -2)
 scale = Vector2(3.6031246, 2.01875)
 texture = ExtResource("2_1ehe0")
+
+[node name="Background" type="Parallax2D" parent="Sprite2D" unique_id=137970211]
+scroll_scale = Vector2(0.3, 0.3)
+repeat_size = Vector2(320, 320)
+repeat_times = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="Sprite2D/Background" unique_id=904790588]
+position = Vector2(422, 365)
+texture = ExtResource("3_ce3w2")
+centered = false
 
 [node name="Title" type="Label" parent="." unique_id=1043887500]
 layout_mode = 1

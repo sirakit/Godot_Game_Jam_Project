@@ -3,6 +3,7 @@ extends CharacterBody2D
 @export var thrust_speed: float = 600.0
 @export var damping: float = 0.92
 @export var retract_speed_mult: float = 2.0
+@export var recall_speed: float = 3200.0
 @export var hammer_rest_deg: float = -80.0
 @export var hammer_strike_deg: float = 0.0
 @export var hammer_lift_deg: float = -35.0
@@ -23,6 +24,9 @@ var being_retracted: bool = false
 var current_meteorite: Node2D = null
 var meteorites_in_range: Array[Area2D] = []
 var near_ship: bool = false                     # ตั้งค่าโดย ship.gd
+var _retract_speed: float = 1200.0
+var _dock_penalty: float = 0.0
+var _recall_hold: float = 0.0
 
 @onready var detect_area: Area2D = $DetectArea
 
@@ -39,6 +43,9 @@ func set_ship_position(pos: Vector2) -> void:
 	
 func _on_debris_hit() -> void:
 	_cam_shake = 1.0
+	_recall_hold = 0.0                  # โดนเศษขยะ = ขัดจังหวะการเรียกยานกลับ
+	if Game.touch_mode:
+		Input.vibrate_handheld(80)
 
 func _physics_process(delta: float) -> void:
 	Game.tick(delta)
@@ -49,22 +56,17 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if not being_retracted and Game.should_retract():
-		being_retracted = true
+		_start_retract(thrust_speed * retract_speed_mult, Game.OXYGEN_OUT_PENALTY)
 
 	if being_retracted:
-		global_position = global_position.move_toward(
-			ship_position, thrust_speed * retract_speed_mult * delta)
+		global_position = global_position.move_toward(ship_position, _retract_speed * delta)
 		velocity = Vector2.ZERO
 		if global_position.distance_to(ship_position) < 12.0:
 			_finish_dock()
 		return
-
-	var input_vec := Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
-	)
+	var input_vec := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if input_vec.length() > 0.0:
-		velocity += input_vec.normalized() * (thrust_speed + Game.thrust_speed_bonus) * delta
+		velocity += input_vec * (thrust_speed + Game.thrust_speed_bonus) * delta
 	velocity *= damping
 	move_and_slide()
 
@@ -79,6 +81,7 @@ func _physics_process(delta: float) -> void:
 			velocity -= n * outward               
 		dist = Game.tether_length_max
 	Game.update_tether(dist)
+	_update_recall(delta, dist)
 
 	# # กด E ใกล้ยาน = ส่งของ
 	if near_ship and Input.is_action_just_pressed("interact"):
@@ -93,8 +96,8 @@ func _physics_process(delta: float) -> void:
 		else:
 			current_meteorite.cool_down(delta)
 		if Input.is_action_just_pressed("interact"):
-			current_meteorite.collect()
-			_set_target(null)
+				if current_meteorite.collect():
+					_set_target(null)
 	else:
 		current_meteorite = null
 						  # กัน error เมื่ออุกกาบาตถูก queue_free
@@ -108,6 +111,7 @@ func _physics_process(delta: float) -> void:
 func undock() -> void:
 	docked = false
 	being_retracted = false
+	_dock_penalty = 0.0
 	Game.start_outside()
 
 func _finish_dock() -> void:
@@ -115,7 +119,27 @@ func _finish_dock() -> void:
 	docked = true
 	_set_target(null)
 	global_position = ship_position
-	Game.dock()
+	var penalty := _dock_penalty
+	_dock_penalty = 0.0
+	Game.dock(penalty)
+	
+func _start_retract(speed: float, penalty: float) -> void:
+	being_retracted = true
+	_retract_speed = speed
+	_dock_penalty = penalty
+	_recall_hold = 0.0
+	Game.recall_progress = 0.0
+
+func _update_recall(delta: float, dist: float) -> void:
+	if dist >= Game.RECALL_MIN_DISTANCE and Input.is_action_pressed("recall"):
+		_recall_hold += delta
+		Game.recall_progress = clampf(_recall_hold / Game.RECALL_HOLD_TIME, 0.0, 1.0)
+		if _recall_hold >= Game.RECALL_HOLD_TIME:
+			_start_retract(recall_speed, Game.RECALL_FEE)
+	else:
+		_recall_hold = 0.0
+		Game.recall_progress = 0.0
+
 
 func _on_area_entered(area: Area2D) -> void:
 	var meteor := area.get_parent()

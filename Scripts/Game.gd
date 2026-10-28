@@ -10,6 +10,7 @@ signal collection_changed()
 signal collection_completed()
 signal perfect_extraction()
 signal debris_hit()
+signal dock_penalty_applied(penalty: float, lost: int)
 
 
 var restart_progress: float = 0.0
@@ -36,6 +37,30 @@ var is_outside: bool = false
 var upgrade_levels := {"oxygen": 0, "chisel": 0, "tether": 0, "drill": 0, "income": 0, "speed": 0}
 const UPGRADE_BASE_COST := {"oxygen": 20.0, "chisel": 15.0, "tether": 10.0, "drill": 30.0, "income": 25.0, "speed": 20.0}
 const UPGRADE_COST_GROWTH := 1.5                # ราคาโต 50% ทุกเลเวล
+const UPGRADE_CAP := 10
+const UPGRADE_ORDER := ["oxygen", "chisel", "tether", "drill", "income", "speed"]
+const UPGRADE_NAME := {
+	"oxygen": "O2 Tank", "chisel": "Chisel", "tether": "Tether",
+	"drill": "Drill", "income": "Contract", "speed": "Thrusters",
+}
+const UPGRADE_DESC := {
+	"oxygen": "More time outside the ship before you are forced back.",
+	"chisel": "Breaks meteorite HP faster. Works on every tier.",
+	"tether": "Fly farther (opens new zones) and move a little faster.",
+	"drill": "Shreds meteorite DEF. High tiers mine at only 25% speed without it.",
+	"income": "More credits for every artifact you hand in.",
+	"speed": "Cross the map faster and save oxygen.",
+}
+const TETHER_THRUST_BONUS := 100.0
+const SPEED_PER_LEVEL := 150.0           # เดิม 75 (Playtest 9: Thrusters ไม่คุ้มราคา)
+const RECALL_MIN_DISTANCE := 1000.0
+const RECALL_HOLD_TIME := 1.2
+const RECALL_FEE := 0.10                 # เรียกยานกลับ: เสีย 10% ของมูลค่าที่ถือ
+const OXYGEN_OUT_PENALTY := 0.30         # ออกซิเจนหมดถูกดึงกลับ: เสีย 30%
+
+var touch_mode: bool = false
+var ui_modal_open: bool = false
+var recall_progress: float = 0.0
 
 func get_upgrade_cost(id: String) -> int:
 	return int(UPGRADE_BASE_COST[id] * pow(UPGRADE_COST_GROWTH, upgrade_levels[id]))
@@ -50,16 +75,21 @@ func start_outside() -> void:
 	is_outside = true
 	reset_trip()
 
-func dock() -> void:
+func dock(penalty: float = 0.0) -> void:
 	is_outside = false
+	var lost := 0
 	for a in carried_artifacts:
-		var earned := int(a["value"] * income_multiplier)
+		var full := int(a["value"] * income_multiplier)
+		var earned := int(full * (1.0 - penalty))
+		lost += full - earned
 		points += earned
 		total_earned += earned
 	carried_artifacts.clear()
 	points_changed.emit(points)
 	artifacts_changed.emit(0)
 	trip_ended.emit()
+	if lost > 0:
+		dock_penalty_applied.emit(penalty, lost)
 
 func add_artifact(art_data: Dictionary) -> void:
 	carried_artifacts.append(art_data)
@@ -86,7 +116,12 @@ func update_tether(distance_from_ship: float) -> void:
 func should_retract() -> bool:
 	return oxygen <= 0.0
 
+func is_maxed(id: String) -> bool:
+	return upgrade_levels[id] >= UPGRADE_CAP
+
 func _buy(id: String) -> bool:
+	if is_maxed(id):
+		return false
 	var cost := get_upgrade_cost(id)
 	if points < cost:
 		return false
@@ -109,7 +144,7 @@ func upgrade_chisel() -> void:
 func upgrade_tether() -> void:
 	if _buy("tether"):
 		tether_length_max += 500.0
-		thrust_speed_bonus += 100.0
+		thrust_speed_bonus += TETHER_THRUST_BONUS
 		tether_remaining = tether_length_max
 		tether_changed.emit(tether_remaining, tether_length_max)
 
@@ -123,7 +158,7 @@ func upgrade_income() -> void:
 
 func upgrade_speed() -> void:
 	if _buy("speed"):
-		thrust_speed_bonus += 75.0
+		thrust_speed_bonus += SPEED_PER_LEVEL
 
 func reset_all() -> void:                        # ปุ่ม restart 
 	oxygen_max = 100.0
@@ -134,6 +169,7 @@ func reset_all() -> void:                        # ปุ่ม restart
 	income_multiplier = 1.0
 	points = 0
 	total_earned = 0
+	recall_progress = 0.0
 	carried_artifacts.clear()
 	is_outside = false
 	
@@ -146,4 +182,24 @@ func reset_all() -> void:                        # ปุ่ม restart
 	points_changed.emit(points)
 	artifacts_changed.emit(0)
 	upgrades_changed.emit()
+	
+# ความเร็วสูงสุดที่เพิ่มต่อแรงขับ 1 หน่วย: dt(1/60) x damping(0.92) / (1 - 0.92) ถ้าเปลี่ยน damping ใน player.gd ต้องแก้ตรงนี้
+func speed_gain(thrust_bonus: float) -> int:
+	return roundi(thrust_bonus / 60.0 * 0.92 / 0.08)
+
+func effect_text(id: String) -> String:
+	match id:
+		"oxygen":
+			return "Max O2   %d > %d" % [int(oxygen_max), int(oxygen_max + 40.0)]
+		"chisel":
+			return "Chisel power   %d > %d" % [int(chisel_strength), int(chisel_strength + 1.0)]
+		"tether":
+			return "Tether   %d > %d px   speed +%d px/s" % [int(tether_length_max), int(tether_length_max + 500.0), speed_gain(TETHER_THRUST_BONUS)]
+		"drill":
+			return "Drill power   %d > %d" % [int(drill_strength), int(drill_strength + 1.0)]
+		"income":
+			return "Income   x%.2f > x%.2f" % [income_multiplier, income_multiplier + 0.25]
+		"speed":
+			return "Top speed   +%d px/s" % speed_gain(SPEED_PER_LEVEL)
+	return ""
 	

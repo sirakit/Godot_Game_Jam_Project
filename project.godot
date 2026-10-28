@@ -18,7 +18,6 @@ config/icon="res://Assets/sprites/icon.svg"
 [autoload]
 
 Game="*uid://42idu4jsg8bf"
-ArtifactDb="*uid://cbe08atn6ob8e"
 
 [display]
 

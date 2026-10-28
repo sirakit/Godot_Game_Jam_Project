@@ -1,57 +1,45 @@
 extends Control
 
+const AUTO_OPEN_SHOP_AFTER_DOCK := false        # true = เปิด popup อัปเกรดเองตอนกลับยานถ้ามีของซื้อได้
+
 @onready var oxygen_bar: ProgressBar = $OxygenBar
 @onready var tether_bar: ProgressBar = $TetherBar
 @onready var points_label: Label = $PointsLabel
 @onready var artifacts_label: Label = $ArtifactsLabel
 @onready var hint_label: Label = $HintLabel
-@onready var upgrade_buttons: HBoxContainer = $UpgradeButtons
 @onready var hit_flash: ColorRect = $HitFlash
 
-
-const UPGRADE_UI := {
-	"oxygen": {"node": "BtnOxygen", "label": "O2 Tank",
-		"desc": "Max oxygen +40. Lets you stay outside the ship longer before you're forced back."},
-	"chisel": {"node": "BtnChisel", "label": "Chisel",
-		"desc": "Chisel strength +1. Breaks rock integrity faster on EVERY meteorite (common and rare)."},
-	"tether": {"node": "BtnTether", "label": "Tether",
-		"desc": "Max tether length +500px and bonus speed +20px. Lets you fly farther from the ship before you hit the rope's limit."},
-	"drill":  {"node": "BtnDrill",  "label": "Drill",
-		"desc": "Drill strength +1. Rare (purple) meteorites need enough Drill or they mine 3x slower — upgrading Chisel does NOT help with this."},
-	"income": {"node": "BtnIncome", "label": "Contract",
-		"desc": "Income multiplier +25%. Applies to every artifact's value when you dock and hand it in."},
-	"speed":  {"node": "BtnSpeed",  "label": "Thrusters",
-		"desc": "Movement speed +75. Lets you reach distant meteorites faster and save oxygen."},
-}
+var _upgrade_panel: UpgradePanel
+var _btn_upgrades: Button
+var _menu_root: Control
+var _restart_btn: Button
+var _restart_armed: bool = false
+var _toast: Label
+var _toast_tween: Tween
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	process_mode = Node.PROCESS_MODE_ALWAYS          # ให้ปุ่มเมนูกดได้ตอนเกมหยุด (pause)
 	Game.oxygen_changed.connect(_on_oxygen_changed)
 	Game.tether_changed.connect(_on_tether_changed)
 	Game.points_changed.connect(_on_points_changed)
 	Game.artifacts_changed.connect(_on_artifacts_changed)
-	Game.upgrades_changed.connect(_refresh_buttons)
+	Game.upgrades_changed.connect(_refresh_top)
 	Game.perfect_extraction.connect(_on_perfect)
 	Game.debris_hit.connect(_on_debris_hit)
-	hit_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE   # สำคัญ: ไม่งั้นบล็อกเมาส์ ทำให้ hover หินไม่ติด
-	hit_flash.color = Color(0.543, 0.02, 0.02, 0.0)
+	Game.dock_penalty_applied.connect(_on_dock_penalty)
+	Game.trip_ended.connect(_on_trip_ended)
 
-	upgrade_buttons.get_node("BtnOxygen").pressed.connect(Game.upgrade_oxygen)
-	upgrade_buttons.get_node("BtnChisel").pressed.connect(Game.upgrade_chisel)
-	upgrade_buttons.get_node("BtnTether").pressed.connect(Game.upgrade_tether)
-	upgrade_buttons.get_node("BtnDrill").pressed.connect(Game.upgrade_drill)
-	upgrade_buttons.get_node("BtnIncome").pressed.connect(Game.upgrade_income)
-	upgrade_buttons.get_node("BtnSpeed").pressed.connect(Game.upgrade_speed)
+	hit_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE   # ไม่งั้นบล็อกเมาส์ ทำให้ hover/แตะหินไม่ติด
+	hit_flash.color.a = 0.0
 
-	for btn in upgrade_buttons.get_children():
-		if btn is Button:
-			btn.focus_mode = Control.FOCUS_NONE
+	var old_buttons := get_node_or_null("UpgradeButtons")  # แถวปุ่ม 6 ปุ่มเดิม ใช้ popup แทนแล้ว
+	if old_buttons != null:
+		old_buttons.visible = false
 
-	_on_oxygen_changed(Game.oxygen, Game.oxygen_max)
-	_on_tether_changed(Game.tether_remaining, Game.tether_length_max)
-	_on_points_changed(Game.points)
-	_on_artifacts_changed(Game.carried_artifacts.size())
-	_refresh_buttons()
+	_build_top_row()
+	_build_upgrade_panel()
+	_build_menu()
+	_build_toast()
 
 	if has_node("PerfectLabel"):
 		$PerfectLabel.visible = false
@@ -59,16 +47,176 @@ func _ready() -> void:
 	if has_node("CollectionLog"):
 		$CollectionLog.visible = false
 
+	_on_oxygen_changed(Game.oxygen, Game.oxygen_max)
+	_on_tether_changed(Game.tether_remaining, Game.tether_length_max)
+	_on_points_changed(Game.points)
+	_on_artifacts_changed(Game.carried_artifacts.size())
+
+# ---------- สร้าง UI ด้วยโค้ด ----------
+func _make_button(text: String, callback: Callable, min_size := Vector2(128, 64)) -> Button:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = min_size
+	b.focus_mode = Control.FOCUS_NONE                 # กัน Space ไปกดปุ่มแทนการตอก
+	b.pressed.connect(callback)
+	return b
+
+func _build_top_row() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	add_child(row)
+	row.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	row.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	row.offset_left = -380.0
+	row.offset_right = -16.0
+	row.offset_top = 12.0
+	_btn_upgrades = _make_button("UPGRADES", _open_upgrades, Vector2(150, 64))
+	row.add_child(_btn_upgrades)
+	row.add_child(_make_button("LOG", _toggle_log, Vector2(88, 64)))
+	row.add_child(_make_button("MENU", _open_menu, Vector2(104, 64)))
+
+func _build_upgrade_panel() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	_upgrade_panel = UpgradePanel.new()
+	add_child(_upgrade_panel)
+
+func _build_menu() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	_menu_root = Control.new()
+	_menu_root.visible = false
+	add_child(_menu_root)
+	_menu_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var backdrop := ColorRect.new()
+	backdrop.color = Color(0, 0, 0, 0.6)
+	_menu_root.add_child(backdrop)
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var panel := PanelContainer.new()
+	_menu_root.add_child(panel)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 20)
+	panel.add_child(margin)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	margin.add_child(box)
+	var title := Label.new()
+	title.text = "PAUSED"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	box.add_child(title)
+	box.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	box.add_child(_make_button("Resume", _close_menu, Vector2(300, 64)))
+	_restart_btn = _make_button("Restart run", _on_restart_pressed, Vector2(300, 64))
+	box.add_child(_restart_btn)
+	box.add_child(_make_button("Main menu", _on_main_menu_pressed, Vector2(300, 64)))
+
+func _build_toast() -> void:
+	_toast = Label.new()
+	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast.add_theme_font_size_override("font_size", 24)
+	_toast.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	_toast.modulate.a = 0.0
+	add_child(_toast)
+	_toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_toast.offset_left = -360.0
+	_toast.offset_right = 360.0
+	_toast.offset_top = 150.0
+
+func _show_toast(text: String, color: Color) -> void:
+	_toast.text = text
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	_toast.add_theme_color_override("font_color", color)
+	if _toast_tween != null:
+		_toast_tween.kill()
+	_toast.modulate.a = 1.0
+	_toast_tween = create_tween()
+	_toast_tween.tween_property(_toast, "modulate:a", 0.0, 0.8).set_delay(2.0)
+
+# ---------- ปุ่ม ----------
+func _open_upgrades() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_upgrade_panel.open()
+
+func _toggle_log() -> void:
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	var log_panel := get_node_or_null("CollectionLog")
+	if log_panel != null:
+		log_panel.visible = not log_panel.visible
+
+func _open_menu() -> void:
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	_restart_armed = false
+	_restart_btn.text = "Restart run"
+	_menu_root.visible = true
+	get_tree().paused = true
+
+func _close_menu() -> void:
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	_menu_root.visible = false
+	get_tree().paused = false
+
+func _on_restart_pressed() -> void:
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	if not _restart_armed:                            # กดครั้งแรก = ขอยืนยัน กันกดพลาดบนจอสัมผัส
+		_restart_armed = true
+		_restart_btn.text = "Tap again to confirm"
+		return
+	get_tree().paused = false
+	Game.reset_all()
+	get_tree().reload_current_scene()
+
+func _on_main_menu_pressed() -> void:
+	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://Scenes/main_menu.tscn")
+
+# ---------- ทุกเฟรม ----------
 func _process(_delta: float) -> void:
-	upgrade_buttons.visible = not Game.is_outside
+	_btn_upgrades.visible = not Game.is_outside
+	if Game.is_outside and _upgrade_panel.visible:
+		_upgrade_panel.close()
+
+	var log_panel := get_node_or_null("CollectionLog")
+	log_panel.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	var log_open: bool = log_panel != null and log_panel.visible
+	Game.ui_modal_open = _upgrade_panel.visible or _menu_root.visible or log_open
+
 	if Game.restart_progress > 0.0:
 		hint_label.text = "Restarting... %d%%   (release R to cancel)" % int(Game.restart_progress * 100.0)
 		return
-	if Game.is_outside:
-		hint_label.text = "[SPACE] hold to chisel (watch the HEAT)   [E] collect artifact   fly back to ship + [E] to hand in   [C] collection log"
-	else:
-		hint_label.text = "[E] launch into space   |   hover a button to see what it does   |   hold [R] restart   [C] collection log"
+	hint_label.text = _hint_text()
 
+func _hint_text() -> String:
+	var dist := Game.tether_length_max - Game.tether_remaining
+	var far := dist >= Game.RECALL_MIN_DISTANCE
+	var fee := roundi(Game.RECALL_FEE * 100.0)
+	if Game.touch_mode:
+		if Game.is_outside:
+			var t := "Left thumb: fly   |   hold CHISEL (watch the HEAT)   |   action button: collect / dock"
+			if far:
+				t += "   |   hold RECALL (-%d%% of carried value)" % fee
+			return t
+		return "Tap LAUNCH to go out   |   UPGRADES to power up   |   LOG for your collection"
+	if Game.is_outside:
+		var t2 := "[SPACE] hold to chisel (watch the HEAT)   [E] collect / dock"
+		if far:
+			t2 += "   [F] hold: recall to ship (-%d%% of carried value)" % fee
+		return t2
+	return "[E] launch into space   |   click UPGRADES to power up"
+
+# ---------- สัญญาณ ----------
 func _on_oxygen_changed(value, max_value) -> void:
 	oxygen_bar.max_value = max_value
 	oxygen_bar.value = value
@@ -81,28 +229,25 @@ func _on_tether_changed(value, max_value) -> void:
 
 func _on_points_changed(value) -> void:
 	points_label.text = "Credit: %d" % value
-	_refresh_buttons()
-	
-func _on_debris_hit() -> void:
-	hit_flash.color.a = 0.35
-	var tw := create_tween()
-	tw.tween_property(hit_flash, "color:a", 0.0, 0.4)
+	_refresh_top()
 
 func _on_artifacts_changed(count) -> void:
 	artifacts_label.text = "Artifacts carried: %d" % count
 
-func _refresh_buttons() -> void:
-	for id in UPGRADE_UI.keys():
-		var btn := upgrade_buttons.get_node_or_null(UPGRADE_UI[id]["node"]) as Button
-		if btn == null:
-			continue
-		var cost := Game.get_upgrade_cost(id)
-		# "→ Lv.N" คือเลเวลที่ "กำลังจะซื้อ" เลยไม่มีทางโชว์ Lv.0 อีกต่อไป (แก้บั๊กข้อ 2)
-		btn.text = "%s > Lv.%d (%d pt)" % [UPGRADE_UI[id]["label"], Game.upgrade_levels[id] + 1, cost]
-		btn.tooltip_text = UPGRADE_UI[id]["desc"]
-		btn.disabled = Game.points < cost
+func _refresh_top() -> void:
+	var n := 0
+	for id in Game.UPGRADE_ORDER:
+		if not Game.is_maxed(id) and Game.points >= Game.get_upgrade_cost(id):
+			n += 1
+	_btn_upgrades.text = ("UPGRADES (%d)" % n) if n > 0 else "UPGRADES"
+
+func _on_trip_ended() -> void:
+	if AUTO_OPEN_SHOP_AFTER_DOCK and _btn_upgrades.text != "UPGRADES":
+		_upgrade_panel.open()
 
 func _on_perfect() -> void:
+	if Game.touch_mode:
+		Input.vibrate_handheld(40)
 	if not has_node("PerfectLabel"):
 		return
 	var lbl: Label = $PerfectLabel
@@ -112,3 +257,15 @@ func _on_perfect() -> void:
 	tw.tween_interval(0.4)
 	tw.tween_property(lbl, "modulate:a", 0.0, 1.0)
 	tw.tween_callback(lbl.hide)
+
+func _on_debris_hit() -> void:
+	hit_flash.color.a = 0.45
+	var tw := create_tween()
+	tw.tween_property(hit_flash, "color:a", 0.0, 0.45)
+
+func _on_dock_penalty(penalty: float, lost: int) -> void:
+	var pct := roundi(penalty * 100.0)
+	if penalty >= Game.OXYGEN_OUT_PENALTY - 0.001:
+		_show_toast("OUT OF OXYGEN   -%d%%   (-%d pt)" % [pct, lost], Color(1.0, 0.35, 0.3))
+	else:
+		_show_toast("RECALL FEE   -%d%%   (-%d pt)" % [pct, lost], Color(1.0, 0.75, 0.3))

@@ -33,7 +33,8 @@ func _refresh() -> void:
 			lbl.text = "[x] " + entry_name
 			lbl.modulate = COLOR_FOUND
 		else:
-			lbl.text = "[ ] ??? (Rare)" if rare else "[ ] ???"
+			var tier := ArtifactDB.all_names().find(entry_name) + 1
+			lbl.text = "[ ] ???  (T%d, Zone %d)" % [tier, MeteoriteTiers.best_zone(tier) + 1]
 			lbl.modulate = COLOR_RARE_HIDDEN if rare else COLOR_HIDDEN
 	var found: int = Game.discovered_artifacts.size()
 	var total: int = ArtifactDB.all_names().size()

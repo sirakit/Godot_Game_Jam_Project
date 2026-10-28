@@ -15,6 +15,13 @@ func _ready() -> void:
 	rope_line.width = 3.0
 	_ensure_action("restart", KEY_R)
 	_ensure_action("toggle_log", KEY_C)
+	_ensure_action("recall", KEY_F)
+
+	var rings := ZoneRings.new()
+	add_child(rings)
+	move_child(rings, $Background.get_index() + 1)       # ให้วาดทับพื้นหลังแต่อยู่ใต้หินและผู้เล่น
+	rings.global_position = ship.global_position
+	add_child(NavHud.new())
 	Game.restart_progress = 0.0
 	_restart_armed = not Input.is_action_pressed("restart")   # ถ้ายังกดค้างจากรอบก่อน ต้องปล่อยก่อน
 
