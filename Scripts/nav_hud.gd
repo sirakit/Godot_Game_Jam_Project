@@ -31,7 +31,7 @@ func _ready() -> void:
 	_toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_toast.offset_left = -300.0
 	_toast.offset_right = 300.0
-	_toast.offset_top = 96.0
+	_toast.offset_top = 150.0
 
 func _process(_delta: float) -> void:
 	if not Game.is_outside:

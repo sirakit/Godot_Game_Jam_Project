@@ -1,15 +1,81 @@
 [gd_scene format=3 uid="uid://bhb1vey30wsvl"]
 
 [ext_resource type="Script" uid="uid://bi3q6m2q34q4t" path="res://Scripts/player.gd" id="1_cvnsp"]
-[ext_resource type="Texture2D" uid="uid://k32ladqicsvf" path="res://Assets/sprites/player/Player_sprite.png" id="2_cvnsp"]
+[ext_resource type="Texture2D" uid="uid://b4mo6iu843bos" path="res://Assets/sprites/player/animation/idle_frame_01.png" id="2_f1ek2"]
+[ext_resource type="Texture2D" uid="uid://cm6cn48oob6im" path="res://Assets/sprites/player/animation/chisel_frame_01.png" id="2_fd4e3"]
+[ext_resource type="Texture2D" uid="uid://bluiajdp12qja" path="res://Assets/sprites/player/animation/Floating-forward-frame-1.png" id="2_pu2lt"]
+[ext_resource type="Texture2D" uid="uid://bnd75gmebyfv6" path="res://Assets/sprites/player/animation/chisel_frame_02.png" id="3_qqcod"]
+[ext_resource type="Texture2D" uid="uid://gis4pqnafodh" path="res://Assets/sprites/player/animation/idle_frame_02.png" id="3_tx1dd"]
+[ext_resource type="Texture2D" uid="uid://dpmjribc15bq6" path="res://Assets/sprites/player/animation/Floating-forward-frame-2.png" id="3_ukyrk"]
 [ext_resource type="Texture2D" uid="uid://dhg732mbax7i1" path="res://Assets/sprites/tools/chisel.png" id="3_vgqql"]
+[ext_resource type="Texture2D" uid="uid://bpryr2sa173qu" path="res://Assets/sprites/player/animation/Floating-forward-frame-3.png" id="4_7dp3o"]
 [ext_resource type="Texture2D" uid="uid://b523gxsmory57" path="res://Assets/sprites/tools/hammer.png" id="4_fkybt"]
+[ext_resource type="Texture2D" uid="uid://yf0jnxow4twi" path="res://Assets/sprites/player/animation/idle_frame_03.png" id="4_gymyn"]
+[ext_resource type="Texture2D" uid="uid://cc852hq6pser5" path="res://Assets/sprites/player/animation/chisel_frame_03.png" id="4_igrcy"]
+[ext_resource type="Texture2D" uid="uid://baxewob6uj625" path="res://Assets/sprites/player/animation/idle_frame_04.png" id="5_pu2lt"]
+[ext_resource type="Texture2D" uid="uid://cocp8ndgke3l7" path="res://Assets/sprites/player/animation/idle_frame_05.png" id="6_ukyrk"]
+[ext_resource type="Texture2D" uid="uid://bdye1xwjsctnb" path="res://Assets/sprites/player/animation/idle_frame_06.png" id="7_7dp3o"]
+[ext_resource type="AudioStream" uid="uid://dvsl0bvnu7rll" path="res://Assets/audio/sfx/hammering_rock.mp3" id="13_ukyrk"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_qc24j"]
-radius = 28.846128
+[sub_resource type="SpriteFrames" id="SpriteFrames_xepy2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_fd4e3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_qqcod")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_igrcy")
+}],
+"loop": 1,
+"name": &"Chisel",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_pu2lt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ukyrk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_7dp3o")
+}],
+"loop": 2,
+"name": &"Floating",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_f1ek2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_tx1dd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_gymyn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_pu2lt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_ukyrk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_7dp3o")
+}],
+"loop": 1,
+"name": &"Idle",
+"speed": 6.0
+}]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_xepy2"]
-radius = 33.01515
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fd4e3"]
+size = Vector2(39.423042, 75)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h4iuc"]
+size = Vector2(41, 75)
 
 [node name="Player" type="CharacterBody2D" unique_id=1705927466]
 collision_layer = 3
@@ -18,19 +84,18 @@ hammer_rest_deg = 0.0
 hammer_strike_deg = -54.0
 hammer_lift_deg = -32.0
 
-[node name="Player_Sprite2D" type="Sprite2D" parent="." unique_id=872887285]
-scale = Vector2(0.059469692, 0.06851852)
-texture = ExtResource("2_cvnsp")
-
-[node name="Polygon2D" type="Polygon2D" parent="." unique_id=278239972]
-visible = false
-color = Color(4.3485055, 4.3981676, 4.4849997, 1)
-polygon = PackedVector2Array(-20, 35, -19, -25, -12, -35, 0, -37, 13, -37, 20, -32, 22, -23, 21, 32, 10, 37, -7, 37)
+[node name="Player_Sprite2D" type="AnimatedSprite2D" parent="." unique_id=926439177]
+position = Vector2(-4, -1)
+scale = Vector2(0.3377571, 0.28042245)
+sprite_frames = SubResource("SpriteFrames_xepy2")
+animation = &"Chisel"
+autoplay = "Idle"
+frame_progress = 0.9745583
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1906200216]
-position = Vector2(-1, -5)
+position = Vector2(1.4999998, -1.5)
 scale = Vector2(1.0400009, 1)
-shape = SubResource("CircleShape2D_qc24j")
+shape = SubResource("RectangleShape2D_fd4e3")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1167664602]
 
@@ -38,22 +103,34 @@ shape = SubResource("CircleShape2D_qc24j")
 position = Vector2(-1, -5)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectArea" unique_id=1631598829]
-shape = SubResource("CircleShape2D_xepy2")
+visible = false
+position = Vector2(2.5, 3.5)
+shape = SubResource("RectangleShape2D_h4iuc")
 
 [node name="Tools_Node2D" type="Node2D" parent="." unique_id=2052607886]
+visible = false
 
 [node name="Chisel_Sprite2D" type="Sprite2D" parent="Tools_Node2D" unique_id=722330875]
-position = Vector2(-24, -6.0000005)
+visible = false
+position = Vector2(-20.450565, 16.038055)
 rotation = -2.5651128
-scale = Vector2(0.080317646, 0.07972531)
+scale = Vector2(0.05883968, 0.062580146)
 texture = ExtResource("3_vgqql")
 
 [node name="HammerPivot_Node2D" type="Node2D" parent="Tools_Node2D" unique_id=1407397289]
+visible = false
 position = Vector2(15, -12)
 
 [node name="Hammer_Sprite2D" type="Sprite2D" parent="Tools_Node2D/HammerPivot_Node2D" unique_id=1842906985]
-position = Vector2(-1.0000002, 1)
+visible = false
+position = Vector2(-0.4681549, 12.737839)
 rotation = -0.010060906
-scale = Vector2(0.09029286, 0.08481083)
+scale = Vector2(0.07020447, 0.0668435)
 texture = ExtResource("4_fkybt")
 offset = Vector2(24.729218, -202.6696)
+
+[node name="sfx_hammering" type="AudioStreamPlayer2D" parent="." unique_id=1403832488]
+stream = ExtResource("13_ukyrk")
+volume_db = 1.552
+pitch_scale = 2.16
+max_distance = 4096.0

@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+@onready var player_animation: AnimatedSprite2D = $Player_Sprite2D
+@onready var sfx_hammering: AudioStreamPlayer2D = $sfx_hammering
+
 @export var thrust_speed: float = 600.0
 @export var damping: float = 0.92
 @export var retract_speed_mult: float = 2.0
@@ -52,6 +55,7 @@ func _physics_process(delta: float) -> void:
 
 	if docked:
 		if Input.is_action_just_pressed("interact"):
+			player_animation.play("Idle")
 			undock()
 		return
 
@@ -61,12 +65,20 @@ func _physics_process(delta: float) -> void:
 	if being_retracted:
 		global_position = global_position.move_toward(ship_position, _retract_speed * delta)
 		velocity = Vector2.ZERO
+		player_animation.play("Idle")
 		if global_position.distance_to(ship_position) < 12.0:
 			_finish_dock()
 		return
 	var input_vec := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if input_vec.length() > 0.0:
 		velocity += input_vec * (thrust_speed + Game.thrust_speed_bonus) * delta
+		player_animation.play("Floating")
+		if input_vec.x < 0:
+			player_animation.flip_h = false
+		elif input_vec.x > 0:
+			player_animation.flip_h = true
+	else:
+		player_animation.play("Idle")
 	velocity *= damping
 	move_and_slide()
 
@@ -91,7 +103,9 @@ func _physics_process(delta: float) -> void:
 	_update_target()
 	# # สกัดหิน
 	if is_instance_valid(current_meteorite):
+		
 		if Input.is_action_pressed("chisel"):
+			player_animation.play("Chisel")
 			current_meteorite.chisel(delta, Game.chisel_strength)
 		else:
 			current_meteorite.cool_down(delta)
@@ -100,6 +114,8 @@ func _physics_process(delta: float) -> void:
 					_set_target(null)
 	else:
 		current_meteorite = null
+		
+	_update_chisel_sfx(_was_chiseling)
 						  # กัน error เมื่ออุกกาบาตถูก queue_free
 	if _cam_shake > 0.0:
 		_cam_shake = maxf(0.0, _cam_shake - delta * 2.5)
@@ -112,11 +128,15 @@ func undock() -> void:
 	docked = false
 	being_retracted = false
 	_dock_penalty = 0.0
+	_cam_shake = 0.0
 	Game.start_outside()
 
 func _finish_dock() -> void:
+	_update_chisel_sfx(false)
+	
 	being_retracted = false
 	docked = true
+	_cam_shake = 0.0
 	_set_target(null)
 	global_position = ship_position
 	var penalty := _dock_penalty
@@ -124,6 +144,8 @@ func _finish_dock() -> void:
 	Game.dock(penalty)
 	
 func _start_retract(speed: float, penalty: float) -> void:
+	_update_chisel_sfx(false)
+
 	being_retracted = true
 	_retract_speed = speed
 	_dock_penalty = penalty
@@ -179,6 +201,7 @@ func _update_target() -> void:
 		_set_target(nearest)
 
 func _set_target(meteor: Node2D) -> void:
+	_update_chisel_sfx(false)
 	if is_instance_valid(current_meteorite) and current_meteorite != meteor:
 		current_meteorite.set_targeted(false)     
 	current_meteorite = meteor
@@ -190,9 +213,18 @@ func _process(delta: float) -> void:
 		not docked
 		and not being_retracted
 		and is_instance_valid(current_meteorite)
-		and Input.is_action_pressed("chisel")
+		and Input.is_action_pressed("chisel") 
 	)
 	_update_hammer(delta, chiseling)
+	
+func _update_chisel_sfx(should_play: bool) -> void:
+	if should_play:
+		if not sfx_hammering.playing:
+			sfx_hammering.play()
+	else:
+		if sfx_hammering.playing:
+			sfx_hammering.stop()
+			
 
 func _update_hammer(delta: float, chiseling: bool) -> void:
 	if chiseling:
@@ -207,7 +239,10 @@ func _update_hammer(delta: float, chiseling: bool) -> void:
 				_hammer_down = not _hammer_down
 				hammer_pivot.rotation_degrees = \
 					hammer_strike_deg if _hammer_down else hammer_lift_deg
+					
 	else:
 		hammer_pivot.rotation_degrees = hammer_rest_deg
+		
 
 	_was_chiseling = chiseling
+	

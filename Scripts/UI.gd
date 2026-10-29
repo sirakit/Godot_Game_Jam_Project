@@ -75,9 +75,15 @@ func _build_top_row() -> void:
 	row.offset_right = -16.0
 	row.offset_top = 12.0
 	_btn_upgrades = _make_button("UPGRADES", _open_upgrades, Vector2(150, 64))
+	_btn_upgrades.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
 	row.add_child(_btn_upgrades)
-	row.add_child(_make_button("LOG", _toggle_log, Vector2(88, 64)))
-	row.add_child(_make_button("MENU", _open_menu, Vector2(104, 64)))
+	var _btn_log = _make_button("LOG", _toggle_log, Vector2(88, 64))
+	_btn_log.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	row.add_child(_btn_log)
+	var _btn_menu = _make_button("MENU", _open_menu, Vector2(104, 64))
+	_btn_menu.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	row.add_child(_btn_menu)
+	
 
 func _build_upgrade_panel() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -116,10 +122,15 @@ func _build_menu() -> void:
 	title.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
 	box.add_child(title)
 	box.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
-	box.add_child(_make_button("Resume", _close_menu, Vector2(300, 64)))
+	var _resume_btn = _make_button("Resume", _close_menu, Vector2(300, 64))
+	_resume_btn.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	box.add_child(_resume_btn)
 	_restart_btn = _make_button("Restart run", _on_restart_pressed, Vector2(300, 64))
+	_restart_btn.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
 	box.add_child(_restart_btn)
-	box.add_child(_make_button("Main menu", _on_main_menu_pressed, Vector2(300, 64)))
+	var _main_menu_btn =_make_button("Main menu", _on_main_menu_pressed, Vector2(300, 64))
+	_main_menu_btn.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	box.add_child(_main_menu_btn)
 
 func _build_toast() -> void:
 	_toast = Label.new()
@@ -156,7 +167,7 @@ func _toggle_log() -> void:
 		log_panel.visible = not log_panel.visible
 
 func _open_menu() -> void:
-	add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
+	_restart_btn.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
 	_restart_armed = false
 	_restart_btn.text = "Restart run"
 	_menu_root.visible = true
@@ -193,8 +204,8 @@ func _process(_delta: float) -> void:
 	var log_open: bool = log_panel != null and log_panel.visible
 	Game.ui_modal_open = _upgrade_panel.visible or _menu_root.visible or log_open
 
-	if Game.restart_progress > 0.0:
-		hint_label.text = "Restarting... %d%%   (release R to cancel)" % int(Game.restart_progress * 100.0)
+	if Game.recall_progress > 0.0:
+		hint_label.text = "Recalling... %d%%   (release F to cancel)" % int(Game.recall_progress * 100.0)
 		return
 	hint_label.text = _hint_text()
 
@@ -210,11 +221,11 @@ func _hint_text() -> String:
 			return t
 		return "Tap LAUNCH to go out   |   UPGRADES to power up   |   LOG for your collection"
 	if Game.is_outside:
-		var t2 := "[SPACE] hold to chisel (watch the HEAT)   [E] collect / dock"
+		var t2 := "[SPACE] hold to chisel (watch the HEAT)"
 		if far:
-			t2 += "   [F] hold: recall to ship (-%d%% of carried value)" % fee
+			t2 += "   |   [F] hold: recall "
 		return t2
-	return "[E] launch into space   |   click UPGRADES to power up"
+	return "[E] launch into space   |   click UPGRADES to power up   |   [E] collect / dock" 
 
 # ---------- สัญญาณ ----------
 func _on_oxygen_changed(value, max_value) -> void:

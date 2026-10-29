@@ -28,6 +28,7 @@ var artifact_revealed: bool = false
 var artifact_collected: bool = false
 var artifact_health: float = 100.0
 
+var is_mining: bool = false
 var heat: float = 0.0
 var heat_max: float = 100.0
 var heat_gain_rate: float = 40.0
@@ -58,7 +59,6 @@ func _ready() -> void:
 	if tier <= 0:
 		tier = _auto_tier()
 	_apply_tier()
-	artifact_name = ArtifactDB.COMMON_NAMES.pick_random()
 
 	rock_integrity = rock_integrity_max
 	_home_position = position
@@ -147,6 +147,13 @@ func _process(delta: float) -> void:
 		)
 	visual.rotation += spin_speed * delta        # หมุนเฉพาะภาพ ป้ายกับบาร์ไม่หมุนตาม
 
+	if not is_mining and heat > 0.0:
+		heat = maxf(0.0, heat - heat_cool_rate * delta)
+		_update_bars()
+
+		if heat <= 0.0 and not artifact_revealed:
+				_set_bars_visible(false)
+				
 	if _shake > 0.0:
 		_shake = max(0.0, _shake - delta * 8.0)
 		rock_shape.position = _rock_base_pos + Vector2(randf_range(-2, 2), randf_range(-2, 2)) * _shake
@@ -165,7 +172,8 @@ func set_targeted(active: bool) -> void:
 func chisel(delta: float, strength: float) -> void:
 	if artifact_collected:
 		return
-
+	
+	is_mining = true
 	_shake = 1.0
 	_set_bars_visible(true)
 
@@ -191,6 +199,7 @@ func chisel(delta: float, strength: float) -> void:
 func cool_down(delta: float) -> void:
 	heat = max(0.0, heat - heat_cool_rate * delta)
 	_update_bars()
+	
 	if heat <= 0.0 and not artifact_revealed:
 		_set_bars_visible(false)
 
