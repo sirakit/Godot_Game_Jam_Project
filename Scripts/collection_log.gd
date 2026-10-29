@@ -38,13 +38,29 @@ func _refresh() -> void:
 		
 		if Game.discovered_artifacts.has(entry_name):
 			lbl.text = "[x] " + entry_name
-			lbl.modulate = COLOR_FOUND
+			if ancient:
+				lbl.modulate = COLOR_ANCIENT_HIDDEN
+			elif legendary:
+				lbl.modulate = COLOR_LEGENDARY_HIDDEN
+			elif epic:
+				lbl.modulate = COLOR_EPIC_HIDDEN
+			elif rare:
+				lbl.modulate = COLOR_RARE_HIDDEN
+			else:
+				lbl.modulate = COLOR_FOUND
 		else:
 			var tier := ArtifactDB.all_names().find(entry_name) + 1
 			lbl.text = "[ ] ???  (T%d, Zone %d)" % [tier, MeteoriteTiers.best_zone(tier) + 1]
-			lbl.modulate = COLOR_RARE_HIDDEN if rare else COLOR_HIDDEN
-			lbl.modulate = COLOR_EPIC_HIDDEN if epic else COLOR_HIDDEN
-			lbl.modulate = COLOR_LEGENDARY_HIDDEN if legendary else COLOR_HIDDEN
+			if ancient:
+				lbl.modulate = COLOR_ANCIENT_HIDDEN
+			elif legendary:
+				lbl.modulate = COLOR_LEGENDARY_HIDDEN
+			elif epic:
+				lbl.modulate = COLOR_EPIC_HIDDEN
+			elif rare:
+				lbl.modulate = COLOR_RARE_HIDDEN
+			else:
+				lbl.modulate = COLOR_HIDDEN
 			
 	var found: int = Game.discovered_artifacts.size()
 	var total: int = ArtifactDB.all_names().size()

@@ -88,9 +88,9 @@ hammer_lift_deg = -32.0
 position = Vector2(-4, -1)
 scale = Vector2(0.3377571, 0.28042245)
 sprite_frames = SubResource("SpriteFrames_xepy2")
-animation = &"Chisel"
+animation = &"Idle"
 autoplay = "Idle"
-frame_progress = 0.9745583
+frame_progress = 0.025270298
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1906200216]
 position = Vector2(1.4999998, -1.5)

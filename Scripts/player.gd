@@ -52,7 +52,7 @@ func _on_debris_hit() -> void:
 
 func _physics_process(delta: float) -> void:
 	Game.tick(delta)
-
+		
 	if docked:
 		if Input.is_action_just_pressed("interact"):
 			player_animation.play("Idle")
