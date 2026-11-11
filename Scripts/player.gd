@@ -208,6 +208,7 @@ func _set_target(meteor: Node2D) -> void:
 
 func _process(delta: float) -> void:
 	tools.visible = not docked
+	player_animation.visible = not docked
 
 	var chiseling := (
 		not docked

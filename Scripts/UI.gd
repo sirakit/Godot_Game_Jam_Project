@@ -71,13 +71,13 @@ func _build_top_row() -> void:
 	add_child(row)
 	row.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	row.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	row.offset_left = -380.0
+	row.offset_left = -200.0
 	row.offset_right = -16.0
 	row.offset_top = 12.0
 	_btn_upgrades = _make_button("UPGRADES", _open_upgrades, Vector2(150, 64))
 	_btn_upgrades.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
 	row.add_child(_btn_upgrades)
-	var _btn_log = _make_button("LOG", _toggle_log, Vector2(88, 64))
+	var _btn_log = _make_button("LOG", _toggle_log, Vector2(150, 64))
 	_btn_log.add_theme_font_override("font", load("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"))
 	row.add_child(_btn_log)
 	var _btn_menu = _make_button("MENU", _open_menu, Vector2(104, 64))
@@ -213,6 +213,12 @@ func _hint_text() -> String:
 	var dist := Game.tether_length_max - Game.tether_remaining
 	var far := dist >= Game.RECALL_MIN_DISTANCE
 	var fee := roundi(Game.RECALL_FEE * 100.0)
+		# ตั้งค่าให้กางเต็มแนวนอนด้านล่าง และข้อความชิดขวา
+	hint_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		# เว้นระยะห่างจากขอบจอเล็กน้อย (Offset) ไม่ให้ตัวหนังสือแนบติดขอบเกินไป
+	hint_label.offset_right = -24.0
+	hint_label.offset_bottom = -16.0
 	if Game.touch_mode:
 		if Game.is_outside:
 			var t := "Left thumb: fly   |   hold CHISEL (watch the HEAT)   |   action button: collect / dock"
@@ -221,11 +227,11 @@ func _hint_text() -> String:
 			return t
 		return "Tap LAUNCH to go out   |   UPGRADES to power up   |   LOG for your collection"
 	if Game.is_outside:
-		var t2 := "[SPACE] hold to chisel (watch the HEAT)"
+		var t2 := "[SPACE] hold to chisel (watch the HEAT)   |   [E] collect / dock"
 		if far:
 			t2 += "   |   [F] hold: recall "
 		return t2
-	return "[E] launch into space   |   click UPGRADES to power up   |   [E] collect / dock" 
+	return "[E] launch into space   |   click UPGRADES to power up   " 
 
 # ---------- สัญญาณ ----------
 func _on_oxygen_changed(value, max_value) -> void:

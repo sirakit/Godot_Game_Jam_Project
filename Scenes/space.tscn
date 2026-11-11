@@ -113,29 +113,31 @@ theme_override_fonts/font = ExtResource("11_0b4c6")
 [node name="PointsLabel" type="Label" parent="CanvasLayer2/UI" unique_id=474903319]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 158.0
+offset_top = 122.0
 offset_right = 77.0
-offset_bottom = 181.0
+offset_bottom = 145.0
 theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Credit:"
 
 [node name="ArtifactsLabel" type="Label" parent="CanvasLayer2/UI" unique_id=1775528617]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 128.0
+offset_top = 92.0
 offset_right = 172.0
-offset_bottom = 151.0
+offset_bottom = 115.0
 theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Artifacts carried:"
 
 [node name="HintLabel" type="Label" parent="CanvasLayer2/UI" unique_id=946433765]
 layout_mode = 0
-offset_left = 15.0
-offset_top = 93.0
-offset_right = 964.0
-offset_bottom = 116.0
+offset_left = 693.0
+offset_top = 610.0
+offset_right = 1137.0
+offset_bottom = 633.0
 theme_override_fonts/font = ExtResource("11_0b4c6")
-text = "[SPACE] hold to chisel (watch the HEAT)   [E] collect artifact   fly back to ship + [E] to hand in   [C] collection log"
+text = "Hint Labal"
+horizontal_alignment = 3
+vertical_alignment = 3
 
 [node name="O2" type="Label" parent="CanvasLayer2/UI" unique_id=1986622478]
 layout_mode = 0
