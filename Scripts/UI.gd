@@ -1,5 +1,6 @@
 extends Control
 
+const UI_FONT := preload("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf")
 const AUTO_OPEN_SHOP_AFTER_DOCK := false        # true = เปิด popup อัปเกรดเองตอนกลับยานถ้ามีของซื้อได้
 
 @onready var oxygen_bar: ProgressBar = $OxygenBar
@@ -15,9 +16,15 @@ var _menu_root: Control
 var _restart_btn: Button
 var _restart_armed: bool = false
 var _toast: Label
+var _dock_banner: Label
+var _heat_warn: Label
 var _toast_tween: Tween
 
+
 func _ready() -> void:
+	var t := Theme.new()
+	t.default_font = UI_FONT
+	theme = t           # ลูกทุกตัวของ UI (รวมสมุดสะสมและ popup ที่สร้างด้วยโค้ด) ใช้ฟอนต์นี้เอง
 	process_mode = Node.PROCESS_MODE_ALWAYS          # ให้ปุ่มเมนูกดได้ตอนเกมหยุด (pause)
 	Game.oxygen_changed.connect(_on_oxygen_changed)
 	Game.tether_changed.connect(_on_tether_changed)
@@ -28,6 +35,10 @@ func _ready() -> void:
 	Game.debris_hit.connect(_on_debris_hit)
 	Game.dock_penalty_applied.connect(_on_dock_penalty)
 	Game.trip_ended.connect(_on_trip_ended)
+	Game.artifact_collected.connect(_on_artifact_collected)
+	Game.heat_danger_changed.connect(_on_heat_danger)
+	Game.docked.connect(_on_docked)
+	
 
 	hit_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE   # ไม่งั้นบล็อกเมาส์ ทำให้ hover/แตะหินไม่ติด
 	hit_flash.color.a = 0.0
@@ -40,6 +51,7 @@ func _ready() -> void:
 	_build_upgrade_panel()
 	_build_menu()
 	_build_toast()
+	_build_banners()
 
 	if has_node("PerfectLabel"):
 		$PerfectLabel.visible = false
@@ -195,6 +207,14 @@ func _on_main_menu_pressed() -> void:
 
 # ---------- ทุกเฟรม ----------
 func _process(_delta: float) -> void:
+	var t := Time.get_ticks_msec() / 1000.0
+	var docked_now := not Game.is_outside and not Game.ui_modal_open   # popup เปิดอยู่ไม่ต้องโชว์
+	_dock_banner.visible = docked_now
+	if docked_now:
+		_dock_banner.text = "DOCKED\nPress [E] to launch"
+		_dock_banner.modulate.a = 0.7 + 0.3 * sin(t * 4.0)           # กะพริบช้าๆ ให้รู้ว่ากดได้
+	if _heat_warn.visible:
+		_heat_warn.modulate.a = 0.55 + 0.45 * absf(sin(t * 9.0))     # กะพริบเร็วกว่า = เร่งด่วน
 	_btn_upgrades.visible = not Game.is_outside
 	if Game.is_outside and _upgrade_panel.visible:
 		_upgrade_panel.close()
@@ -286,3 +306,45 @@ func _on_dock_penalty(penalty: float, lost: int) -> void:
 		_show_toast("OUT OF OXYGEN   -%d%%   (-%d pt)" % [pct, lost], Color(1.0, 0.35, 0.3))
 	else:
 		_show_toast("RECALL FEE   -%d%%   (-%d pt)" % [pct, lost], Color(1.0, 0.75, 0.3))
+
+func _make_banner(size: int, color: Color) -> Label:
+	var l := Label.new()
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	l.add_theme_constant_override("outline_size", 8)    # ขอบดำ อ่านออกบนพื้นหลังดาว
+	l.visible = false
+	add_child(l)
+	return l
+
+func _build_banners() -> void:
+	_dock_banner = _make_banner(34, Color(0.55, 1.0, 0.7))
+	_dock_banner.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_dock_banner.offset_left = -400.0
+	_dock_banner.offset_right = 400.0
+	_dock_banner.offset_top = -200.0
+	_dock_banner.offset_bottom = -90.0
+	_heat_warn = _make_banner(30, Color(1.0, 0.35, 0.25))
+	_heat_warn.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_heat_warn.offset_left = -400.0
+	_heat_warn.offset_right = 400.0
+	_heat_warn.offset_top = 120.0
+	_heat_warn.text = "OVERHEATING!   release to cool down"
+
+func _on_heat_danger(active: bool) -> void:
+	_heat_warn.visible = active
+
+func _on_artifact_collected(tier: int, artifact_name: String, quality: int, is_new: bool) -> void:
+	var r := MeteoriteTiers.rarity(tier)
+	var col: Color = MeteoriteTiers.RARITY_COLORS[r]
+	var rarity_name: String = MeteoriteTiers.RARITY_NAMES[r]
+	if is_new:
+		_show_toast("NEW DISCOVERY!   T%d  %s  (%s)" % [tier, artifact_name, rarity_name], col)
+	else:
+		_show_toast("Collected   T%d  %s   %d%%" % [tier, artifact_name, quality], col)
+
+func _on_docked(handed_in: int, earned: int) -> void:
+	if handed_in > 0:
+		_show_toast("HANDED IN   %d artifact%s   +%d pt" % [handed_in, "" if handed_in == 1 else "s", earned], Color(0.55, 1.0, 0.7))

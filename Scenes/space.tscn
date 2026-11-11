@@ -160,12 +160,13 @@ text = "TETHER"
 [node name="PerfectLabel" type="Label" parent="CanvasLayer2/UI" unique_id=1855824627]
 modulate = Color(1, 1, 0, 1)
 layout_mode = 0
-offset_left = 786.0
-offset_top = 174.0
-offset_right = 994.0
-offset_bottom = 197.0
+offset_left = 730.0
+offset_top = 266.0
+offset_right = 938.0
+offset_bottom = 289.0
 theme_override_fonts/font = ExtResource("11_0b4c6")
 text = " PERFECT EXTRACTION! "
+horizontal_alignment = 1
 
 [node name="UpgradeButtons" type="HBoxContainer" parent="CanvasLayer2/UI" unique_id=1901410214]
 visible = false

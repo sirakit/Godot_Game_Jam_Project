@@ -19,6 +19,7 @@ config/icon="res://Assets/sprites/icon.svg"
 
 Game="*uid://42idu4jsg8bf"
 Bgm="*uid://cwqvera8a83a8"
+Sfx="*uid://vg03n2cpoqsr"
 
 [display]
 

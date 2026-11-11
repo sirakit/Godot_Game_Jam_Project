@@ -28,6 +28,16 @@ const ZONE_WEIGHTS := [
 	[0, 0, 0, 0, 0, 10, 20, 25, 25, 20],
 ]
 
+const RARITY_NAMES := ["COMMON", "RARE", "EPIC", "LEGENDARY", "ANCIENT"]
+const RARITY_COLORS := [
+	Color(0.70, 0.78, 0.70), Color(0.24, 0.59, 0.79), Color(0.85, 0.28, 0.75),
+	Color(0.94, 0.62, 0.16), Color(0.79, 0.15, 0.15),
+]
+
+# tier 1-2 = COMMON, 3-4 = RARE, 5-6 = EPIC, 7-8 = LEGENDARY, 9-10 = ANCIENT (ตรงกับลำดับใน ArtifactDB)
+static func rarity(tier: int) -> int:
+	return (clampi(tier, 1, 10) - 1) >> 1
+
 static func zone_of(distance: float) -> int:
 	for z in ZONE_OUTER.size():
 		if distance < ZONE_OUTER[z]:

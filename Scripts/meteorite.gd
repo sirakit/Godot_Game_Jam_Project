@@ -28,7 +28,8 @@ var artifact_revealed: bool = false
 var artifact_collected: bool = false
 var artifact_health: float = 100.0
 
-var is_mining: bool = false
+var _mining_grace: float = 0.0     # > 0 = กำลังถูกตอก (chisel() ต่อให้ทุก tick)
+var _hot: bool = false             # ร้อนเกินเส้นอันตรายตอนกำลังถูกตอก
 var heat: float = 0.0
 var heat_max: float = 100.0
 var heat_gain_rate: float = 40.0
@@ -147,12 +148,6 @@ func _process(delta: float) -> void:
 		)
 	visual.rotation += spin_speed * delta        # หมุนเฉพาะภาพ ป้ายกับบาร์ไม่หมุนตาม
 
-	if not is_mining and heat > 0.0:
-		heat = maxf(0.0, heat - heat_cool_rate * delta)
-		_update_bars()
-
-		if heat <= 0.0 and not artifact_revealed:
-				_set_bars_visible(false)
 				
 	if _shake > 0.0:
 		_shake = max(0.0, _shake - delta * 8.0)
@@ -173,7 +168,7 @@ func chisel(delta: float, strength: float) -> void:
 	if artifact_collected:
 		return
 	
-	is_mining = true
+	_mining_grace = 0.06
 	_shake = 1.0
 	_set_bars_visible(true)
 
@@ -196,19 +191,15 @@ func chisel(delta: float, strength: float) -> void:
 
 	_update_bars()
 
-func cool_down(delta: float) -> void:
-	heat = max(0.0, heat - heat_cool_rate * delta)
-	_update_bars()
-	
-	if heat <= 0.0 and not artifact_revealed:
-		_set_bars_visible(false)
-
 func _update_bars() -> void:
 	heat_bar.value = heat
 	integrity_bar.value = artifact_health
 	var danger := heat_damage_threshold if not artifact_revealed else heat_damage_threshold * 0.6
 	heat_bar.modulate = Color(1.0, 0.25, 0.15) if heat > danger else Color(1.0, 0.65, 0.2)
 	integrity_bar.modulate = Color(1.0, 0.3, 0.3) if artifact_health < 50.0 else Color(0.4, 0.9, 1.0)
+		# เตือนเฉพาะตอน "กำลังตอก" และร้อนเกินเส้น (หินที่เย็นอยู่เองไม่เป็นอันตราย)
+	var limit := heat_damage_threshold * (0.6 if artifact_revealed else 1.0)
+	_set_hot(heat > limit and _mining_grace > 0.0)
 	if info_label.visible:
 		_refresh_info_label()
 
@@ -236,7 +227,10 @@ func collect() -> bool:
 		if is_perfect:
 			final_value = int(final_value * 1.5)
 
-		Game.add_artifact({"name": artifact_name, "value": final_value})
+		Game.add_artifact({
+			"name": artifact_name, "value": final_value,
+			"tier": tier, "quality": int(artifact_health),
+		})
 		if is_perfect:
 			Game.perfect_extraction.emit()
 
@@ -265,3 +259,27 @@ func _refresh_info_label() -> void:
 	else:
 		lines.append("[!] DEF %.1f - Drill %d: mining at %d%% speed" % [defense, int(Game.drill_strength), int(mult * 100.0)])
 	info_label.text = "\n".join(lines)
+
+func _physics_process(delta: float) -> void:
+	if _mining_grace > 0.0:
+		_mining_grace -= delta
+		return
+	if heat > 0.0:                      # ไม่มีใครตอก = เย็นลงเอง ไม่ว่าผู้เล่นอยู่ไหน
+		heat = maxf(0.0, heat - heat_cool_rate * delta)
+		_update_bars()
+
+func _set_hot(on: bool) -> void:
+	if on != _hot:
+		_hot = on
+		Game.set_rock_hot(get_instance_id(), on)
+
+func _exit_tree() -> void:
+	if _hot:
+		Game.set_rock_hot(get_instance_id(), false)   # หินถูกเก็บ/ลบตอนร้อนอยู่ ต้องปิดคำเตือนด้วย
+		
+func cool_down(delta: float) -> void:
+	heat = max(0.0, heat - heat_cool_rate * delta)
+	_update_bars()
+	
+	if heat <= 0.0 and not artifact_revealed:
+		_set_bars_visible(false)

@@ -11,6 +11,10 @@ signal collection_completed()
 signal perfect_extraction()
 signal debris_hit()
 signal dock_penalty_applied(penalty: float, lost: int)
+signal artifact_collected(tier: int, artifact_name: String, quality: int, is_new: bool)
+signal heat_danger_changed(active: bool)
+signal launched()
+signal docked(handed_in: int, earned: int)
 
 
 var restart_progress: float = 0.0
@@ -62,6 +66,10 @@ var touch_mode: bool = false
 var ui_modal_open: bool = false
 var recall_progress: float = 0.0
 
+var collected_counts: Dictionary = {}   # ชื่อ artifact -> จำนวนที่เก็บ
+var best_quality: Dictionary = {}       # ชื่อ artifact -> คุณภาพสูงสุด (%)
+var _hot_rocks: Dictionary = {}         # id หินที่ร้อนเกินเส้นอันตรายตอนถูกตอก
+
 func get_upgrade_cost(id: String) -> int:
 	return int(UPGRADE_BASE_COST[id] * pow(UPGRADE_COST_GROWTH, upgrade_levels[id]))
 
@@ -74,14 +82,18 @@ func reset_trip() -> void:
 func start_outside() -> void:
 	is_outside = true
 	reset_trip()
+	launched.emit()
 
 func dock(penalty: float = 0.0) -> void:
 	is_outside = false
 	var lost := 0
+	var handed := carried_artifacts.size()
+	var gained := 0
 	for a in carried_artifacts:
 		var full := int(a["value"] * income_multiplier)
 		var earned := int(full * (1.0 - penalty))
 		lost += full - earned
+		gained += earned
 		points += earned
 		total_earned += earned
 	carried_artifacts.clear()
@@ -89,19 +101,39 @@ func dock(penalty: float = 0.0) -> void:
 	artifacts_changed.emit(0)
 	trip_ended.emit()
 	if lost > 0:
-		dock_penalty_applied.emit(penalty, lost)
+		dock_penalty_applied.emit(penalty, lost)      # ป้ายค่าปรับสำคัญกว่า จึงไม่ซ้อนป้ายสรุป
+	else:
+		docked.emit(handed, gained)
 
 func add_artifact(art_data: Dictionary) -> void:
 	carried_artifacts.append(art_data)
 	artifacts_changed.emit(carried_artifacts.size())
 
 	var art_name: String = art_data.get("name", "")
-	# นับเข้าสมุดสะสมเฉพาะชื่อที่อยู่ในแคตตาล็อกจริง กัน "Unknown Artifact" มาดันตัวเลข
-	if ArtifactDB.is_valid(art_name) and not discovered_artifacts.has(art_name):
-		discovered_artifacts[art_name] = true
-		collection_changed.emit()
-		if discovered_artifacts.size() >= ArtifactDB.all_names().size():
-			collection_completed.emit()
+	var tier: int = art_data.get("tier", 0)
+	var quality: int = art_data.get("quality", 0)
+	var is_new := false
+	if ArtifactDB.is_valid(art_name):
+		collected_counts[art_name] = int(collected_counts.get(art_name, 0)) + 1
+		best_quality[art_name] = maxi(int(best_quality.get(art_name, 0)), quality)
+		is_new = not discovered_artifacts.has(art_name)
+		if is_new:
+			discovered_artifacts[art_name] = true
+			collection_changed.emit()
+			if discovered_artifacts.size() >= ArtifactDB.all_names().size():
+				collection_completed.emit()
+	artifact_collected.emit(tier, art_name, quality, is_new)
+
+# หินแต่ละก้อนแจ้งว่า "ร้อนเกินเส้นตอนถูกตอก" หรือเปล่า เตือนเมื่อมีอย่างน้อย 1 ก้อน
+func set_rock_hot(id: int, hot: bool) -> void:
+	var was := not _hot_rocks.is_empty()
+	if hot:
+		_hot_rocks[id] = true
+	else:
+		_hot_rocks.erase(id)
+	var now := not _hot_rocks.is_empty()
+	if now != was:
+		heat_danger_changed.emit(now)
 
 func tick(delta: float) -> void:
 	if is_outside:
@@ -182,6 +214,10 @@ func reset_all() -> void:                        # ปุ่ม restart
 	points_changed.emit(points)
 	artifacts_changed.emit(0)
 	upgrades_changed.emit()
+	collected_counts.clear()
+	best_quality.clear()
+	_hot_rocks.clear()
+	heat_danger_changed.emit(false)
 	
 # ความเร็วสูงสุดที่เพิ่มต่อแรงขับ 1 หน่วย: dt(1/60) x damping(0.92) / (1 - 0.92) ถ้าเปลี่ยน damping ใน player.gd ต้องแก้ตรงนี้
 func speed_gain(thrust_bonus: float) -> int:
