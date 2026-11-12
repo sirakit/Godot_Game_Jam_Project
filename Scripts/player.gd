@@ -1,5 +1,6 @@
+## res://Scripts/player.gd
 extends CharacterBody2D
-## ควบคุมผู้เล่นในอวกาศ ปรับขนาด Sprite อัตโนมัติให้เท่ากันทุกอนิเมชัน และแสดงท่าทางขึ้น-ลงชัดเจน
+## ควบคุมผู้เล่นในอวกาศ รุ่นเพิ่มประสิทธิภาพ (Cache Scale ล่วงหน้าและลดการสร้าง Array ทุกเฟรม)
 
 @export_group("Movement & Tether")
 @export var thrust_speed: float = 600.0
@@ -40,7 +41,7 @@ var _juice_time: float = 0.0
 var _base_sprite_pos: Vector2 = Vector2.ZERO
 var _base_tools_pos: Vector2 = Vector2.ZERO
 var _editor_scale: Vector2 = Vector2.ONE
-var _reference_height: float = 64.0
+var _anim_scales: Dictionary = {}
 
 @onready var player_animation: AnimatedSprite2D = $Player_Sprite2D
 @onready var sfx_hammering: AudioStreamPlayer2D = $sfx_hammering
@@ -63,11 +64,27 @@ func _ready() -> void:
 	_base_tools_pos = tools.position
 	player_animation.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	
-	# วัดขนาดภาพจากอนิเมชัน Idle เป็นมาตรฐาน เพื่อไม่ให้ภาพ Floating ใหญ่ทะลุจอ
-	if player_animation.sprite_frames and player_animation.sprite_frames.has_animation("Idle"):
-		var idle_tex: Texture2D = player_animation.sprite_frames.get_frame_texture("Idle", 0)
+	_cache_animation_scales()
+
+
+func _cache_animation_scales() -> void:
+	# คำนวณขนาดภาพแต่ละอนิเมชันเก็บไว้ครั้งเดียวตอนเริ่มเกม ไม่ต้องเรียก get_frame_texture() ทุกเฟรม
+	var sf: SpriteFrames = player_animation.sprite_frames
+	if not sf:
+		return
+	var ref_h: float = 64.0
+	if sf.has_animation("Idle") and sf.get_frame_count("Idle") > 0:
+		var idle_tex: Texture2D = sf.get_frame_texture("Idle", 0)
 		if idle_tex:
-			_reference_height = idle_tex.get_height()
+			ref_h = float(idle_tex.get_height())
+			
+	for anim_name: StringName in sf.get_animation_names():
+		if sf.get_frame_count(anim_name) > 0:
+			var tex: Texture2D = sf.get_frame_texture(anim_name, 0)
+			if tex and tex.get_height() > 0:
+				_anim_scales[anim_name] = _editor_scale * (ref_h / float(tex.get_height()))
+			else:
+				_anim_scales[anim_name] = _editor_scale
 
 
 func _process(delta: float) -> void:
@@ -80,6 +97,7 @@ func _process(delta: float) -> void:
 		and is_instance_valid(current_meteorite)
 		and Input.is_action_pressed("chisel")
 	)
+	_update_hammer(delta, chiseling)
 	_update_chisel_sfx(chiseling)
 
 
@@ -106,7 +124,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var input_vec: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	if input_vec.length() > 0.0:
+	if input_vec.length_squared() > 0.0:
 		velocity += input_vec * (thrust_speed + Game.thrust_speed_bonus) * delta
 		if input_vec.x < 0.0:
 			player_animation.flip_h = false
@@ -132,7 +150,8 @@ func _physics_process(delta: float) -> void:
 		_finish_dock()
 		return
 		
-	_update_target()
+	if not meteorites_in_range.is_empty() or current_meteorite != null:
+		_update_target()
 	
 	var is_chiseling: bool = false
 	if is_instance_valid(current_meteorite):
@@ -147,12 +166,14 @@ func _physics_process(delta: float) -> void:
 	else:
 		current_meteorite = null
 
+	var target_anim: StringName = &"Idle"
 	if is_chiseling:
-		player_animation.play("Chisel")
-	elif input_vec.length() > 0.0:
-		player_animation.play("Floating")
-	else:
-		player_animation.play("Idle")
+		target_anim = &"Chisel"
+	elif input_vec.length_squared() > 0.0:
+		target_anim = &"Floating"
+		
+	if player_animation.animation != target_anim or not player_animation.is_playing():
+		player_animation.play(target_anim)
 
 	_apply_cartoon_juice(input_vec, is_chiseling, delta)
 
@@ -176,15 +197,7 @@ func undock() -> void:
 
 
 func _get_normalized_base_scale() -> Vector2:
-	# คำนวณอัตราส่วนภาพปัจจุบันเทียบกับ Idle เพื่อให้ขนาดตัวละครเท่ากันเสมอแม้ไฟล์ภาพใหญ่ไม่เท่ากัน
-	if player_animation.sprite_frames:
-		var anim_name: StringName = player_animation.animation
-		var frame_idx: int = player_animation.frame
-		var tex: Texture2D = player_animation.sprite_frames.get_frame_texture(anim_name, frame_idx)
-		if tex and tex.get_height() > 0:
-			var ratio: float = _reference_height / float(tex.get_height())
-			return _editor_scale * ratio
-	return _editor_scale
+	return _anim_scales.get(player_animation.animation, _editor_scale)
 
 
 func _apply_cartoon_juice(input_vec: Vector2, is_chiseling: bool, delta: float) -> void:
@@ -193,25 +206,21 @@ func _apply_cartoon_juice(input_vec: Vector2, is_chiseling: bool, delta: float) 
 	var vel_x_ratio: float = clampf(velocity.x / max_vel, -1.0, 1.0)
 	var vel_y_ratio: float = clampf(velocity.y / max_vel, -1.0, 1.0)
 	
-	# 1. การหมุนและเอียงตัว (แยกชัดเจนระหว่างพุ่งขึ้น พุ่งลง และซ้าย-ขวา)
 	var facing_sign: float = 1.0 if player_animation.flip_h else -1.0
 	var horizontal_tilt: float = vel_x_ratio * max_tilt_deg
-	# ตอนกดขึ้น (input_vec.y < 0) ตัวจะโน้มไปข้างหน้า ตอนกดลง (input_vec.y > 0) ตัวจะเอนหงายหลังต้านแรง
 	var vertical_tilt: float = -input_vec.y * vertical_pitch_deg * facing_sign
 	var zero_g_sway: float = sin(_juice_time * bob_frequency * 0.6) * 4.0
 	
 	var target_deg: float = horizontal_tilt + vertical_tilt + zero_g_sway
 	player_animation.rotation = lerp_angle(player_animation.rotation, deg_to_rad(target_deg), tilt_smoothing * delta)
 	
-	# 2. การยืด-หด (Squash & Stretch) ตอนขึ้น vs ตอนลง
 	var scale_mult := Vector2.ONE
 	var target_speed_scale: float = 1.0
 	
 	if is_chiseling:
 		scale_mult = Vector2(1.18, 0.85) if _hammer_down else Vector2(0.9, 1.12)
-	elif input_vec.length() > 0.0:
+	elif input_vec.length_squared() > 0.0:
 		if input_vec.y < -0.1:
-			# กำลังพุ่งขึ้น (UP): ยืดตัวยาวเพรียวชัดเจน + เร่งความเร็วเฟรมไอพ่น 2 เท่า
 			var up_factor: float = maxf(absf(input_vec.y), absf(vel_y_ratio))
 			scale_mult = Vector2(
 				1.0 - (up_factor * stretch_amount * 0.65),
@@ -219,7 +228,6 @@ func _apply_cartoon_juice(input_vec: Vector2, is_chiseling: bool, delta: float) 
 			)
 			target_speed_scale = 2.0
 		elif input_vec.y > 0.1:
-			# กำลังพุ่งลง (DOWN): กดตัวแบนป้อมออกด้านข้าง (Squash) + ชะลอเฟรมไอพ่นลง
 			var down_factor: float = maxf(absf(input_vec.y), absf(vel_y_ratio))
 			scale_mult = Vector2(
 				1.0 + (down_factor * stretch_amount * 0.85),
@@ -227,7 +235,6 @@ func _apply_cartoon_juice(input_vec: Vector2, is_chiseling: bool, delta: float) 
 			)
 			target_speed_scale = 0.5
 		else:
-			# บินซ้าย-ขวา
 			var side_factor: float = maxf(absf(input_vec.x), absf(vel_x_ratio))
 			scale_mult = Vector2(
 				1.0 + (side_factor * stretch_amount * 0.35),
@@ -235,14 +242,12 @@ func _apply_cartoon_juice(input_vec: Vector2, is_chiseling: bool, delta: float) 
 			)
 			target_speed_scale = 1.3
 	else:
-		# ลอยนิ่งๆ ในอวกาศ
 		var breathe: float = sin(_juice_time * bob_frequency) * 0.05
 		scale_mult = Vector2(1.0 - breathe, 1.0 + breathe)
 		
 	player_animation.scale = player_animation.scale.lerp(norm_scale * scale_mult, 15.0 * delta)
 	player_animation.speed_scale = target_speed_scale
 	
-	# 3. ขยับตัวขึ้น-ลงตามคลื่น Zero-G + ขยับนำสายตาตามทิศทางขึ้น/ลง
 	var bob_y: float = sin(_juice_time * bob_frequency) * bob_amplitude
 	var vertical_lead_y: float = input_vec.y * 6.0
 	var final_offset := Vector2(0.0, bob_y + vertical_lead_y)
@@ -316,19 +321,20 @@ func _on_area_exited(area: Area2D) -> void:
 
 
 func _update_target() -> void:
-	meteorites_in_range = meteorites_in_range.filter(
-		func(a: Area2D) -> bool: return is_instance_valid(a)
-	)
+	# ลบโหนดที่ตายแล้วแบบย้อนกลับโดยไม่สร้าง Array ใหม่ทุกเฟรม
+	for i: int in range(meteorites_in_range.size() - 1, -1, -1):
+		if not is_instance_valid(meteorites_in_range[i]):
+			meteorites_in_range.remove_at(i)
 
 	var nearest: Node2D = null
-	var nearest_dist: float = INF
+	var nearest_dist_sq: float = INF
 	for area: Area2D in meteorites_in_range:
 		var meteor := area.get_parent() as Node2D
 		if not is_instance_valid(meteor):
 			continue
-		var d: float = global_position.distance_to(meteor.global_position)
-		if d < nearest_dist:
-			nearest_dist = d
+		var d_sq: float = global_position.distance_squared_to(meteor.global_position)
+		if d_sq < nearest_dist_sq:
+			nearest_dist_sq = d_sq
 			nearest = meteor
 
 	if nearest == null:
@@ -338,7 +344,7 @@ func _update_target() -> void:
 
 	if is_instance_valid(current_meteorite) and nearest != current_meteorite:
 		var current_dist: float = global_position.distance_to(current_meteorite.global_position)
-		if current_dist - nearest_dist < 20.0:
+		if current_dist - sqrt(nearest_dist_sq) < 20.0:
 			return
 
 	if nearest != current_meteorite:
@@ -359,3 +365,22 @@ func _update_chisel_sfx(should_play: bool) -> void:
 	else:
 		if sfx_hammering.playing:
 			sfx_hammering.stop()
+
+
+func _update_hammer(delta: float, chiseling: bool) -> void:
+	if chiseling:
+		if not _was_chiseling:
+			_hammer_down = true
+			_swing_timer = 0.0
+			hammer_pivot.rotation_degrees = hammer_strike_deg
+		else:
+			_swing_timer += delta
+			if _swing_timer >= swing_interval:
+				_swing_timer -= swing_interval
+				_hammer_down = not _hammer_down
+				var target_deg: float = hammer_strike_deg if _hammer_down else hammer_lift_deg
+				hammer_pivot.rotation_degrees = target_deg
+	else:
+		hammer_pivot.rotation_degrees = lerpf(hammer_pivot.rotation_degrees, hammer_rest_deg, 15.0 * delta)
+
+	_was_chiseling = chiseling

@@ -1,6 +1,7 @@
+## res://Scripts/nav_hud.gd
 class_name NavHud
 extends CanvasLayer
-## แสดงลูกศรชี้ตำแหน่งยาน แจ้งเตือนเมื่อเข้าโซนใหม่ และแจ้งเตือนเมื่อระบบ Recall ปลดล็อกพร้อมใช้งาน
+## แสดงลูกศรชี้ตำแหน่งยานและแจ้งเตือนโซน รุ่นประหยัดพลังงาน (ไม่สั่ง queue_redraw ทุกเฟรม)
 
 const EDGE_MARGIN := 56.0
 const FONT_PATH := "res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf"
@@ -14,6 +15,8 @@ var _ship: Node2D
 var _player: Node2D
 var _max_zone: int = 0
 var _recall_notified: bool = false
+var _redraw_timer: float = 0.0
+var _was_drawing_indicator: bool = false
 
 
 func _ready() -> void:
@@ -29,7 +32,6 @@ func _ready() -> void:
 
 	var custom_font := load(FONT_PATH) as Font
 
-	# ป้ายแจ้งเตือนโซนหลัก
 	_toast = Label.new()
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -43,7 +45,6 @@ func _ready() -> void:
 	_toast.offset_right = 350.0
 	_toast.offset_top = 150.0
 
-	# ป้ายแจ้งเตือนปลดล็อก Recall (แสดงแยกด้านล่างป้ายโซนเพื่อไม่ให้ข้อความตีกัน)
 	_recall_toast = Label.new()
 	_recall_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_recall_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -58,12 +59,20 @@ func _ready() -> void:
 	_recall_toast.offset_top = 192.0
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not Game.is_outside:
 		_max_zone = 0
 		_recall_notified = false
-		_pad.queue_redraw()
+		if _was_drawing_indicator:
+			_was_drawing_indicator = false
+			_pad.queue_redraw()
 		return
+
+	# จำกัดการเช็คและวาดลูกศรเพียง 20 ครั้งต่อวินาที แทนการวาดใหม่ทุกเฟรม
+	_redraw_timer += delta
+	if _redraw_timer < 0.05:
+		return
+	_redraw_timer = 0.0
 
 	var dist: float = _player.global_position.distance_to(_ship.global_position)
 	var z: int = MeteoriteTiers.zone_of(dist)
@@ -72,12 +81,18 @@ func _process(_delta: float) -> void:
 		_max_zone = z
 		_show_zone_toast(z)
 
-	# แจ้งเตือนเมื่อเข้าสู่โซนถัดจากยาน (z >= 1) หรือถึงระยะปลดล็อก Recall ครั้งแรกของการออกนอกยาน
 	if not _recall_notified and (z >= 1 or dist >= Game.RECALL_MIN_DISTANCE):
 		_recall_notified = true
 		_show_recall_unlocked_toast()
 
-	_pad.queue_redraw()
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var ship_screen: Vector2 = get_viewport().get_canvas_transform() * _ship.global_position
+	var ship_on_screen: bool = Rect2(Vector2.ZERO, vp).grow(-EDGE_MARGIN).has_point(ship_screen)
+	
+	# ถ้าสถานีอวกาศอยู่ในจออยู่แล้ว ไม่ต้องสั่งวาดหน้าจอใหม่เลย
+	if not ship_on_screen or _was_drawing_indicator:
+		_was_drawing_indicator = not ship_on_screen
+		_pad.queue_redraw()
 
 
 func _show_zone_toast(z: int) -> void:
@@ -106,12 +121,10 @@ func _show_recall_unlocked_toast() -> void:
 
 
 func _on_draw() -> void:
-	if not Game.is_outside:
+	if not Game.is_outside or not _was_drawing_indicator:
 		return
 	var vp: Vector2 = get_viewport().get_visible_rect().size
 	var ship_screen: Vector2 = get_viewport().get_canvas_transform() * _ship.global_position
-	if Rect2(Vector2.ZERO, vp).grow(-EDGE_MARGIN).has_point(ship_screen):
-		return
 
 	var center: Vector2 = vp * 0.5
 	var dir: Vector2 = (ship_screen - center).normalized()
