@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdye1xwjsctnb"
-path="res://.godot/imported/idle_frame_06.png-f0b3f7c47d6206f38fa75e25d322a047.ctex"
+uid="uid://bfwekkv6h83c6"
+path="res://.godot/imported/drilling_frame_2.png-f43db0b974b1745e60ebdfae4ad38eb3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/sprites/player/animation/idle_frame_06.png"
-dest_files=["res://.godot/imported/idle_frame_06.png-f0b3f7c47d6206f38fa75e25d322a047.ctex"]
+source_file="res://Assets/sprites/player/animation/drilling_frame_2.png"
+dest_files=["res://.godot/imported/drilling_frame_2.png-f43db0b974b1745e60ebdfae4ad38eb3.ctex"]
 
 [params]
 

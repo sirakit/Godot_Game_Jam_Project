@@ -3,7 +3,15 @@
 [ext_resource type="Script" uid="uid://cmb3m4omvhupi" path="res://Scripts/main_menu.gd" id="1_28flt"]
 [ext_resource type="Texture2D" uid="uid://dgot5fi4rrske" path="res://Assets/backgrounds/pixelart_starfield_diagonal_diffraction_spikes.png" id="2_1ehe0"]
 [ext_resource type="FontFile" uid="uid://dvugw8ql7pn07" path="res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf" id="2_48xlc"]
+[ext_resource type="Script" uid="uid://b1x8qlmin0rqe" path="res://Scripts/space_background.gd" id="2_opfnp"]
 [ext_resource type="Texture2D" uid="uid://cj6aa0vbpeelp" path="res://Assets/backgrounds/pixelart_starfield.png" id="3_ce3w2"]
+[ext_resource type="Texture2D" uid="uid://ct3awjdibwdkv" path="res://Assets/backgrounds/pixelart_starfield_corona.png" id="4_cp0ys"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_yhxw7"]
+blend_mode = 1
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_trj04"]
+blend_mode = 1
 
 [sub_resource type="LabelSettings" id="LabelSettings_xepy2"]
 font = ExtResource("2_48xlc")
@@ -22,19 +30,45 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_28flt")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1900589205]
-position = Vector2(0.5, -2)
-scale = Vector2(3.6031246, 2.01875)
-texture = ExtResource("2_1ehe0")
+[node name="SpaceBackground" type="Node2D" parent="." unique_id=1310318112]
+position = Vector2(-489, -108)
+script = ExtResource("2_opfnp")
 
-[node name="Background" type="Parallax2D" parent="Sprite2D" unique_id=137970211]
-scroll_scale = Vector2(0.3, 0.3)
+[node name="Background" type="Parallax2D" parent="SpaceBackground" unique_id=542797914]
+scroll_scale = Vector2(0.1, 0.1)
 repeat_size = Vector2(320, 320)
-repeat_times = 6
+autoscroll = Vector2(-4, 2)
+repeat_times = 8
 
-[node name="Sprite2D" type="Sprite2D" parent="Sprite2D/Background" unique_id=904790588]
+[node name="Sprite2D" type="Sprite2D" parent="SpaceBackground/Background" unique_id=1747295163]
 position = Vector2(422, 365)
 texture = ExtResource("3_ce3w2")
+centered = false
+
+[node name="Background2" type="Parallax2D" parent="SpaceBackground" unique_id=443845336]
+scroll_scale = Vector2(0.25, 0.25)
+repeat_size = Vector2(320, 320)
+autoscroll = Vector2(-10, 5)
+repeat_times = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="SpaceBackground/Background2" unique_id=188241633]
+self_modulate = Color(1, 1, 1, 0.7058824)
+material = SubResource("CanvasItemMaterial_yhxw7")
+position = Vector2(422, 365)
+texture = ExtResource("4_cp0ys")
+centered = false
+
+[node name="Background3" type="Parallax2D" parent="SpaceBackground" unique_id=819280862]
+scroll_scale = Vector2(0.45, 0.45)
+repeat_size = Vector2(320, 320)
+autoscroll = Vector2(-18, 9)
+repeat_times = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="SpaceBackground/Background3" unique_id=1662324049]
+self_modulate = Color(1, 1, 1, 0.5882353)
+material = SubResource("CanvasItemMaterial_trj04")
+position = Vector2(422, 365)
+texture = ExtResource("2_1ehe0")
 centered = false
 
 [node name="Title" type="Label" parent="." unique_id=1043887500]

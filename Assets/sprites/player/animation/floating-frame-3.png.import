@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bluiajdp12qja"
-path="res://.godot/imported/Floating-forward-frame-1.png-2acd4d058fcdc896fd20a10ef6065f19.ctex"
+uid="uid://brrmsm7ct7fxs"
+path="res://.godot/imported/floating-frame-3.png-7bf3a59a06eaeb4b7d6b940179d22370.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/sprites/player/animation/Floating-forward-frame-1.png"
-dest_files=["res://.godot/imported/Floating-forward-frame-1.png-2acd4d058fcdc896fd20a10ef6065f19.ctex"]
+source_file="res://Assets/sprites/player/animation/floating-frame-3.png"
+dest_files=["res://.godot/imported/floating-frame-3.png-7bf3a59a06eaeb4b7d6b940179d22370.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cm6cn48oob6im"
-path="res://.godot/imported/chisel_frame_01.png-f4fae7d340b348dabb246e1ac1080e05.ctex"
+uid="uid://bpkytsb5c4p8w"
+path="res://.godot/imported/drilling_frame_3.png-177cfe76bb4f7e56e4ad56d7441b7d7b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/sprites/player/animation/chisel_frame_01.png"
-dest_files=["res://.godot/imported/chisel_frame_01.png-f4fae7d340b348dabb246e1ac1080e05.ctex"]
+source_file="res://Assets/sprites/player/animation/drilling_frame_3.png"
+dest_files=["res://.godot/imported/drilling_frame_3.png-177cfe76bb4f7e56e4ad56d7441b7d7b.ctex"]
 
 [params]
 

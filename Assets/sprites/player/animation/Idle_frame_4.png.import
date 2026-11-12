@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cc852hq6pser5"
-path="res://.godot/imported/chisel_frame_03.png-a0e56c2de61cb93ea8323fd0144ef7ca.ctex"
+uid="uid://bogis8221cajf"
+path="res://.godot/imported/Idle_frame_4.png-e9ded260e0526f53d263df579ca41dea.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/sprites/player/animation/chisel_frame_03.png"
-dest_files=["res://.godot/imported/chisel_frame_03.png-a0e56c2de61cb93ea8323fd0144ef7ca.ctex"]
+source_file="res://Assets/sprites/player/animation/Idle_frame_4.png"
+dest_files=["res://.godot/imported/Idle_frame_4.png-e9ded260e0526f53d263df579ca41dea.ctex"]
 
 [params]
 

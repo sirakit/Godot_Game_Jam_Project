@@ -1,70 +1,82 @@
 [gd_scene format=3 uid="uid://bhb1vey30wsvl"]
 
 [ext_resource type="Script" uid="uid://bi3q6m2q34q4t" path="res://Scripts/player.gd" id="1_cvnsp"]
-[ext_resource type="Texture2D" uid="uid://b4mo6iu843bos" path="res://Assets/sprites/player/animation/idle_frame_01.png" id="2_f1ek2"]
-[ext_resource type="Texture2D" uid="uid://cm6cn48oob6im" path="res://Assets/sprites/player/animation/chisel_frame_01.png" id="2_fd4e3"]
-[ext_resource type="Texture2D" uid="uid://bluiajdp12qja" path="res://Assets/sprites/player/animation/Floating-forward-frame-1.png" id="2_pu2lt"]
-[ext_resource type="Texture2D" uid="uid://bnd75gmebyfv6" path="res://Assets/sprites/player/animation/chisel_frame_02.png" id="3_qqcod"]
-[ext_resource type="Texture2D" uid="uid://gis4pqnafodh" path="res://Assets/sprites/player/animation/idle_frame_02.png" id="3_tx1dd"]
-[ext_resource type="Texture2D" uid="uid://dpmjribc15bq6" path="res://Assets/sprites/player/animation/Floating-forward-frame-2.png" id="3_ukyrk"]
+[ext_resource type="Texture2D" uid="uid://bl508ekj3xugg" path="res://Assets/sprites/player/animation/drilling_frame_1.png" id="2_h4iuc"]
+[ext_resource type="Texture2D" uid="uid://bfwekkv6h83c6" path="res://Assets/sprites/player/animation/drilling_frame_2.png" id="3_fd4e3"]
 [ext_resource type="Texture2D" uid="uid://dhg732mbax7i1" path="res://Assets/sprites/tools/chisel.png" id="3_vgqql"]
-[ext_resource type="Texture2D" uid="uid://bpryr2sa173qu" path="res://Assets/sprites/player/animation/Floating-forward-frame-3.png" id="4_7dp3o"]
 [ext_resource type="Texture2D" uid="uid://b523gxsmory57" path="res://Assets/sprites/tools/hammer.png" id="4_fkybt"]
-[ext_resource type="Texture2D" uid="uid://yf0jnxow4twi" path="res://Assets/sprites/player/animation/idle_frame_03.png" id="4_gymyn"]
-[ext_resource type="Texture2D" uid="uid://cc852hq6pser5" path="res://Assets/sprites/player/animation/chisel_frame_03.png" id="4_igrcy"]
-[ext_resource type="Texture2D" uid="uid://baxewob6uj625" path="res://Assets/sprites/player/animation/idle_frame_04.png" id="5_pu2lt"]
-[ext_resource type="Texture2D" uid="uid://cocp8ndgke3l7" path="res://Assets/sprites/player/animation/idle_frame_05.png" id="6_ukyrk"]
-[ext_resource type="Texture2D" uid="uid://bdye1xwjsctnb" path="res://Assets/sprites/player/animation/idle_frame_06.png" id="7_7dp3o"]
+[ext_resource type="Texture2D" uid="uid://bpkytsb5c4p8w" path="res://Assets/sprites/player/animation/drilling_frame_3.png" id="4_qqcod"]
+[ext_resource type="Texture2D" uid="uid://bds58osr0vkto" path="res://Assets/sprites/player/animation/drilling_frame_4.png" id="5_igrcy"]
+[ext_resource type="Texture2D" uid="uid://da0ggqhjqej1t" path="res://Assets/sprites/player/animation/drilling_frame_5.png" id="6_fs7ks"]
+[ext_resource type="Texture2D" uid="uid://c5s4brxc62yb" path="res://Assets/sprites/player/animation/floating-frame-1.png" id="8_fd4e3"]
+[ext_resource type="Texture2D" uid="uid://bds30pmrlex26" path="res://Assets/sprites/player/animation/floating-frame-2.png" id="9_qqcod"]
+[ext_resource type="Texture2D" uid="uid://brrmsm7ct7fxs" path="res://Assets/sprites/player/animation/floating-frame-3.png" id="10_igrcy"]
+[ext_resource type="Texture2D" uid="uid://1s81dxb3dq8j" path="res://Assets/sprites/player/animation/floating-frame-4.png" id="11_fs7ks"]
+[ext_resource type="Texture2D" uid="uid://q7opvdjxkqxx" path="res://Assets/sprites/player/animation/floating-frame-5.png" id="12_l6n3p"]
+[ext_resource type="Texture2D" uid="uid://b25dot4tfhktr" path="res://Assets/sprites/player/animation/Idle_frame_1.png" id="13_fs7ks"]
+[ext_resource type="Texture2D" uid="uid://ceafugl0jeirb" path="res://Assets/sprites/player/animation/floating-frame-6.png" id="13_olqyp"]
 [ext_resource type="AudioStream" uid="uid://dvsl0bvnu7rll" path="res://Assets/audio/sfx/hammering_rock.mp3" id="13_ukyrk"]
+[ext_resource type="Texture2D" uid="uid://d04pls5fiocam" path="res://Assets/sprites/player/animation/Idle_frame_2.png" id="14_l6n3p"]
+[ext_resource type="Texture2D" uid="uid://ceo6vphbwvbb1" path="res://Assets/sprites/player/animation/Idle_frame_3.png" id="15_olqyp"]
+[ext_resource type="Texture2D" uid="uid://bogis8221cajf" path="res://Assets/sprites/player/animation/Idle_frame_4.png" id="16_wpjfl"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_xepy2"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_fd4e3")
+"texture": ExtResource("2_h4iuc")
+}, {
+"duration": 1.2,
+"texture": ExtResource("3_fd4e3")
+}, {
+"duration": 1.2,
+"texture": ExtResource("4_qqcod")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_qqcod")
+"texture": ExtResource("5_igrcy")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_igrcy")
+"texture": ExtResource("6_fs7ks")
 }],
 "loop": 1,
 "name": &"Chisel",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_fd4e3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_qqcod")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_igrcy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_fs7ks")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_l6n3p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_olqyp")
+}],
+"loop": 1,
+"name": &"Floating",
 "speed": 6.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_pu2lt")
+"texture": ExtResource("13_fs7ks")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_ukyrk")
+"texture": ExtResource("14_l6n3p")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_7dp3o")
-}],
-"loop": 2,
-"name": &"Floating",
-"speed": 3.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("2_f1ek2")
+"texture": ExtResource("15_olqyp")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_tx1dd")
-}, {
-"duration": 1.0,
-"texture": ExtResource("4_gymyn")
-}, {
-"duration": 1.0,
-"texture": ExtResource("5_pu2lt")
-}, {
-"duration": 1.0,
-"texture": ExtResource("6_ukyrk")
-}, {
-"duration": 1.0,
-"texture": ExtResource("7_7dp3o")
+"texture": ExtResource("16_wpjfl")
 }],
 "loop": 1,
 "name": &"Idle",
@@ -72,10 +84,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fd4e3"]
-size = Vector2(39.423042, 75)
+size = Vector2(48.07688, 39)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_h4iuc"]
-size = Vector2(41, 75)
+size = Vector2(50, 39)
 
 [node name="Player" type="CharacterBody2D" unique_id=1705927466]
 collision_layer = 3
@@ -85,15 +97,15 @@ hammer_strike_deg = -54.0
 hammer_lift_deg = -32.0
 
 [node name="Player_Sprite2D" type="AnimatedSprite2D" parent="." unique_id=926439177]
-position = Vector2(-4, -1)
-scale = Vector2(0.3377571, 0.28042245)
+position = Vector2(3, -2)
+scale = Vector2(0.21985894, 0.18253765)
 sprite_frames = SubResource("SpriteFrames_xepy2")
 animation = &"Idle"
 autoplay = "Idle"
-frame_progress = 0.025270298
+frame_progress = 0.091040745
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1906200216]
-position = Vector2(1.4999998, -1.5)
+position = Vector2(2.0000014, 2.5)
 scale = Vector2(1.0400009, 1)
 shape = SubResource("RectangleShape2D_fd4e3")
 
@@ -103,8 +115,7 @@ shape = SubResource("RectangleShape2D_fd4e3")
 position = Vector2(-1, -5)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectArea" unique_id=1631598829]
-visible = false
-position = Vector2(2.5, 3.5)
+position = Vector2(3, 7.5)
 shape = SubResource("RectangleShape2D_h4iuc")
 
 [node name="Tools_Node2D" type="Node2D" parent="." unique_id=2052607886]

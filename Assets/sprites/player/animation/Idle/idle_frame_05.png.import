@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bpryr2sa173qu"
-path="res://.godot/imported/Floating-forward-frame-3.png-28710581c7424cd87097cfc450fd6698.ctex"
+uid="uid://cocp8ndgke3l7"
+path="res://.godot/imported/idle_frame_05.png-b4a0bfa4b9d7f085a9d49403b01167b6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/sprites/player/animation/Floating-forward-frame-3.png"
-dest_files=["res://.godot/imported/Floating-forward-frame-3.png-28710581c7424cd87097cfc450fd6698.ctex"]
+source_file="res://Assets/sprites/player/animation/Idle/idle_frame_05.png"
+dest_files=["res://.godot/imported/idle_frame_05.png-b4a0bfa4b9d7f085a9d49403b01167b6.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cocp8ndgke3l7"
-path="res://.godot/imported/idle_frame_05.png-4b4baf11fff7b4cf4191f7514d6e2994.ctex"
+uid="uid://q7opvdjxkqxx"
+path="res://.godot/imported/floating-frame-5.png-0b8e925a84124f0e2d55d4317a70e3af.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/sprites/player/animation/idle_frame_05.png"
-dest_files=["res://.godot/imported/idle_frame_05.png-4b4baf11fff7b4cf4191f7514d6e2994.ctex"]
+source_file="res://Assets/sprites/player/animation/floating-frame-5.png"
+dest_files=["res://.godot/imported/floating-frame-5.png-0b8e925a84124f0e2d55d4317a70e3af.ctex"]
 
 [params]
 

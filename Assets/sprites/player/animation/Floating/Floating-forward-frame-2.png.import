@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bnd75gmebyfv6"
-path="res://.godot/imported/chisel_frame_02.png-037dee631b856557c9ab333901987a0f.ctex"
+uid="uid://dpmjribc15bq6"
+path="res://.godot/imported/Floating-forward-frame-2.png-210b1187f2ba32982ab35498dbe9c1e0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/sprites/player/animation/chisel_frame_02.png"
-dest_files=["res://.godot/imported/chisel_frame_02.png-037dee631b856557c9ab333901987a0f.ctex"]
+source_file="res://Assets/sprites/player/animation/Floating/Floating-forward-frame-2.png"
+dest_files=["res://.godot/imported/Floating-forward-frame-2.png-210b1187f2ba32982ab35498dbe9c1e0.ctex"]
 
 [params]
 

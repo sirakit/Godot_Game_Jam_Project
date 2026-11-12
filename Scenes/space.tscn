@@ -3,8 +3,11 @@
 [ext_resource type="PackedScene" uid="uid://bhb1vey30wsvl" path="res://Scenes/player.tscn" id="1_0ll74"]
 [ext_resource type="PackedScene" uid="uid://v5tj4dkrr3nd" path="res://Scenes/ship.tscn" id="1_2fo43"]
 [ext_resource type="Script" uid="uid://brueuaot3k5fq" path="res://Scripts/space.gd" id="1_va77k"]
+[ext_resource type="Script" uid="uid://b1x8qlmin0rqe" path="res://Scripts/space_background.gd" id="2_6umj4"]
 [ext_resource type="Texture2D" uid="uid://cj6aa0vbpeelp" path="res://Assets/backgrounds/pixelart_starfield.png" id="2_sg02i"]
+[ext_resource type="Texture2D" uid="uid://ct3awjdibwdkv" path="res://Assets/backgrounds/pixelart_starfield_corona.png" id="3_p268w"]
 [ext_resource type="PackedScene" uid="uid://div5cflstw8r3" path="res://Scenes/meteorite.tscn" id="3_wnfdr"]
+[ext_resource type="Texture2D" uid="uid://dgot5fi4rrske" path="res://Assets/backgrounds/pixelart_starfield_diagonal_diffraction_spikes.png" id="4_6umj4"]
 [ext_resource type="Script" uid="uid://b0fea6y0ro1vu" path="res://Scripts/meteorite_spawner.gd" id="4_va77k"]
 [ext_resource type="Script" uid="uid://0i87qthaqe4o" path="res://Scripts/UI.gd" id="5_bj3u6"]
 [ext_resource type="Script" uid="uid://du8drdwy5a07y" path="res://Scripts/debris_spawner.gd" id="6_1fjq1"]
@@ -12,17 +15,53 @@
 [ext_resource type="Script" uid="uid://bsf5x6o7re4ep" path="res://Scripts/collection_log.gd" id="9_kqa63"]
 [ext_resource type="FontFile" uid="uid://dvugw8ql7pn07" path="res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf" id="11_0b4c6"]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_xepy2"]
+blend_mode = 1
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_p268w"]
+blend_mode = 1
+
 [node name="Space" type="Node2D" unique_id=1548029567]
 script = ExtResource("1_va77k")
 
-[node name="Background" type="Parallax2D" parent="." unique_id=1332902306]
-scroll_scale = Vector2(0.3, 0.3)
-repeat_size = Vector2(320, 320)
-repeat_times = 6
+[node name="SpaceBackground" type="Node2D" parent="." unique_id=436375208]
+script = ExtResource("2_6umj4")
 
-[node name="Sprite2D" type="Sprite2D" parent="Background" unique_id=1346536537]
+[node name="Background" type="Parallax2D" parent="SpaceBackground" unique_id=1332902306]
+scroll_scale = Vector2(0.1, 0.1)
+repeat_size = Vector2(320, 320)
+autoscroll = Vector2(-4, 2)
+repeat_times = 8
+
+[node name="Sprite2D" type="Sprite2D" parent="SpaceBackground/Background" unique_id=1346536537]
 position = Vector2(422, 365)
 texture = ExtResource("2_sg02i")
+centered = false
+
+[node name="Background2" type="Parallax2D" parent="SpaceBackground" unique_id=545352748]
+scroll_scale = Vector2(0.25, 0.25)
+repeat_size = Vector2(320, 320)
+autoscroll = Vector2(-10, 5)
+repeat_times = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="SpaceBackground/Background2" unique_id=1316419447]
+self_modulate = Color(1, 1, 1, 0.7058824)
+material = SubResource("CanvasItemMaterial_xepy2")
+position = Vector2(422, 365)
+texture = ExtResource("3_p268w")
+centered = false
+
+[node name="Background3" type="Parallax2D" parent="SpaceBackground" unique_id=871338879]
+scroll_scale = Vector2(0.45, 0.45)
+repeat_size = Vector2(320, 320)
+autoscroll = Vector2(-18, 9)
+repeat_times = 6
+
+[node name="Sprite2D" type="Sprite2D" parent="SpaceBackground/Background3" unique_id=1018737630]
+self_modulate = Color(1, 1, 1, 0.5882353)
+material = SubResource("CanvasItemMaterial_p268w")
+position = Vector2(422, 365)
+texture = ExtResource("4_6umj4")
 centered = false
 
 [node name="Ship" parent="." unique_id=1198528667 instance=ExtResource("1_2fo43")]
@@ -130,14 +169,13 @@ text = "Artifacts carried:"
 
 [node name="HintLabel" type="Label" parent="CanvasLayer2/UI" unique_id=946433765]
 layout_mode = 0
-offset_left = 693.0
-offset_top = 610.0
-offset_right = 1137.0
-offset_bottom = 633.0
+offset_left = 14.0
+offset_top = 613.0
+offset_right = 458.0
+offset_bottom = 636.0
 theme_override_fonts/font = ExtResource("11_0b4c6")
 text = "Hint Labal"
-horizontal_alignment = 3
-vertical_alignment = 3
+vertical_alignment = 2
 
 [node name="O2" type="Label" parent="CanvasLayer2/UI" unique_id=1986622478]
 layout_mode = 0
@@ -165,7 +203,6 @@ offset_top = 266.0
 offset_right = 938.0
 offset_bottom = 289.0
 theme_override_fonts/font = ExtResource("11_0b4c6")
-text = " PERFECT EXTRACTION! "
 horizontal_alignment = 1
 
 [node name="UpgradeButtons" type="HBoxContainer" parent="CanvasLayer2/UI" unique_id=1901410214]
