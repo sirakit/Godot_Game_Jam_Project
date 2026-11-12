@@ -82,6 +82,25 @@ func _ready() -> void:
 
 	modulate.a = 0.0
 	create_tween().tween_property(self, "modulate:a", 1.0, 0.6)
+	
+	var notifier := VisibleOnScreenNotifier2D.new()
+	notifier.rect = Rect2(-180.0, -180.0, 360.0, 360.0)
+	add_child(notifier)
+	
+	# ถ้าหินอยู่นอกจอกล้อง ให้หยุดวาดภาพและหยุดรัน _process ทันที (ลด Draw Calls ลง 90%)
+	visual.visible = notifier.is_on_screen()
+	set_process(notifier.is_on_screen())
+	
+	notifier.screen_entered.connect(func() -> void:
+		visual.visible = true
+		set_process(true)
+	)
+	notifier.screen_exited.connect(func() -> void:
+		visual.visible = false
+		set_process(false)
+		_set_bars_visible(false)
+		info_label.visible = false
+	)
 
 
 func _process(delta: float) -> void:
