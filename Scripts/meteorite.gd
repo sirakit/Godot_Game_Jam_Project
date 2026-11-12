@@ -329,7 +329,7 @@ func _spawn_floating_reward_text(final_value: int, is_perfect: bool) -> void:
 	popup.top_level = true
 	popup.z_index = 20
 	popup.global_position = global_position + Vector2(-40.0, -35.0)
-	popup.text = ("PERFECT! +$%d" % final_value) if is_perfect else ("+$%d" % final_value)
+	popup.text = ("PERFECT! + %d pt" % final_value) if is_perfect else ("+ %d pt" % final_value)
 	popup.modulate = Color(1.0, 0.9, 0.25) if is_perfect else Color(0.45, 1.0, 0.65)
 	
 	var scene_root: Node = get_tree().current_scene
