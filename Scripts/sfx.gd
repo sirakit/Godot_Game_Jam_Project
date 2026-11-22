@@ -31,6 +31,9 @@ func _ready() -> void:
 	Game.artifact_collected.connect(_on_collected)
 	Game.heat_danger_changed.connect(_on_heat_danger)
 	Game.upgrades_changed.connect(_on_upgrades)
+	Game.vented.connect(play.bind("vent"))
+	Game.rock_jammed.connect(play.bind("jam"))
+	Game.clang.connect(play.bind("clang", 0.08))
 
 # หาไฟล์ครั้งแรกแล้วจำไว้ ไม่มีไฟล์ = เงียบ ไม่ error เพิ่มเสียงทีละไฟล์ได้เลย
 func _stream(id: String) -> AudioStream:

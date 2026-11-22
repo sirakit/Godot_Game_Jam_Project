@@ -1,8 +1,16 @@
 extends Node2D
-## อุกกาบาตพร้อมเอฟเฟกต์ระเบิดเปลือกหิน ออร่าแร่พร้อมเก็บ และแอนิเมชันดูดแร่เข้าหาผู้เล่น
 
+const SKIN_PATH := "res://Scenes/meteorite_skins/tier_%02d.tscn"
 const HEAVY_ROCK_PATH := "res://Assets/sprites/meteorites/meteorite_2.png"
 const HEAVY_ROCK_FIX := 1.5
+const OVERDRIVE_MAX := 0.5        # โบนัสความเร็วตอกสูงสุดที่เส้นอันตราย
+const SWEET_START := 0.45         # Overdrive เริ่มที่ 45% ของเส้นอันตราย
+const VENT_WIDTH := 0.17          # หน้าต่าง VENT กว้าง 17% ของ heat_max ใต้เส้นอันตราย
+const VENT_COOL := 25.0           # VENT สำเร็จ: ความร้อนลดทันที
+const VENT_MIN_HOLD := 0.3        # ต้องค้างตอกอย่างน้อยเท่านี้ถึงนับเป็นจังหวะ
+const JAM_RESUME := 0.5           # หลัง JAM ต้องเย็นลงถึง 50% ถึงตอกต่อได้
+const JAM_PENALTY := 8.0          # JAM หักคุณภาพ
+const GRIND_HEAT := 1.5           # เจาะไม่เข้า: ความร้อนเพิ่มสูงสุด +150%
 
 @export_group("Artifact")
 @export var rock_integrity_max: float = 30.0
@@ -44,6 +52,15 @@ var _rock_base_pos: Vector2 = Vector2.ZERO
 var _artifact_final_scale: Vector2 = Vector2.ONE
 var _ready_beacon_ring: Line2D = null
 var _ready_sparkles: CPUParticles2D = null
+
+var _jammed: bool = false
+var _hold_time: float = 0.0
+var _was_mining: bool = false
+var _clang_timer: float = 0.0
+var vent_flash: float = 0.0       # > 0 = เพิ่ง VENT สำเร็จ (HUD อ่านไปกะพริบ)
+
+var _skin: MeteoriteSkin = null
+var _hit_timer: float = 0.0
 
 @onready var visual: Node2D = $Visual
 @onready var rock_shape: Polygon2D = $Visual/RockShape
@@ -101,7 +118,19 @@ func _ready() -> void:
 		_set_bars_visible(false)
 		info_label.visible = false
 	)
-
+	
+func _attach_skin() -> void:
+	var path := SKIN_PATH % tier
+	if not ResourceLoader.exists(path):
+		return                                      # ยังไม่มี skin ของ tier นี้ = ใช้ภาพเดิม
+	_skin = (load(path) as PackedScene).instantiate() as MeteoriteSkin
+	if _skin == null:
+		return
+	visual.add_child(_skin)
+	_skin.scale = Vector2.ONE * MeteoriteTiers.SIZE[clampi(tier, 1, 10) - 1]
+	rock_shape.visible = false                      # ซ่อนภาพเดิม
+	_skin.set_tier(tier)
+	_skin.play_idle()
 
 func _process(delta: float) -> void:
 	if drift_enabled and not artifact_collected:
@@ -130,9 +159,21 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	vent_flash = maxf(0.0, vent_flash - delta)
+	if _jammed:                                    # JAM: ตอกไม่ได้ ระบายเร็ว 2 เท่า
+		heat = maxf(0.0, heat - heat_cool_rate * 2.0 * delta)
+		if heat <= heat_max * JAM_RESUME:
+			_jammed = false
+		_update_bars()
+		return
 	if _mining_grace > 0.0:
 		_mining_grace -= delta
+		_was_mining = true
 		return
+	if _was_mining:                                # เพิ่งปล่อยปุ่ม
+		_was_mining = false
+		_on_released()
+	_hold_time = 0.0
 	if heat > 0.0:
 		heat = maxf(0.0, heat - heat_cool_rate * delta)
 		_update_bars()
@@ -149,32 +190,36 @@ func set_targeted(active: bool) -> void:
 
 
 func chisel(delta: float, strength: float) -> void:
-	if artifact_collected:
+	if artifact_collected or _jammed:
 		return
-	
 	_mining_grace = 0.06
+	_hold_time += delta
 	_shake = 1.0
-	_set_bars_visible(true)
 
-	var mult: float = MeteoriteTiers.defense_multiplier(tier, Game.drill_strength)
-	var effective: float = strength * mult
-	extract_bar.modulate = Color.WHITE if mult >= 0.999 else Color(1.0, 0.4, 0.4)
+	var pierce := pierce_mult()
+	if pierce < 0.02:                              # เจาะไม่เข้า: เสียงกระทบ + HUD ขึ้น CLANG
+		_clang_timer -= delta
+		if _clang_timer <= 0.0:
+			_clang_timer = 0.25
+			Game.clang.emit()
+	var rate := heat_gain_rate * (1.0 + GRIND_HEAT * (1.0 - pierce))   # ยิ่งเจาะไม่เข้า ยิ่งเสียดสี ยิ่งร้อน
 
+	var over := heat / heat_max > danger_ratio()
 	if not artifact_revealed:
-		rock_integrity -= effective * 10.0 * delta
-		extract_bar.value = 1.0 - (rock_integrity / rock_integrity_max)
-		heat = minf(heat_max, heat + heat_gain_rate * delta)
-		if heat > heat_damage_threshold:
+		rock_integrity -= strength * pierce * overdrive_mult() * 10.0 * delta
+		heat = minf(heat_max, heat + rate * delta)
+		if over:
 			artifact_health = maxf(0.0, artifact_health - damage_rate * delta)
 		if rock_integrity <= 0.0:
 			reveal_artifact()
 	else:
-		heat = minf(heat_max, heat + heat_gain_rate * 1.5 * delta)
-		if heat > heat_damage_threshold * 0.6:
+		heat = minf(heat_max, heat + rate * 1.5 * delta)
+		if over:
 			artifact_health = maxf(0.0, artifact_health - damage_rate * 1.5 * delta)
 
+	if heat >= heat_max:
+		_jam()
 	_update_bars()
-
 
 func reveal_artifact() -> void:
 	artifact_revealed = true
@@ -235,13 +280,6 @@ func collect() -> bool:
 func get_heat_ratio() -> float:
 	return heat / heat_max
 
-
-func cool_down(delta: float) -> void:
-	heat = maxf(0.0, heat - heat_cool_rate * delta)
-	_update_bars()
-	
-	if heat <= 0.0 and not artifact_revealed:
-		_set_bars_visible(false)
 
 
 func _spawn_rock_break_burst() -> void:
@@ -429,13 +467,10 @@ func _set_bars_visible(v: bool) -> void:
 
 
 func _update_bars() -> void:
-	heat_bar.value = heat
-	integrity_bar.value = artifact_health
-	var danger: float = heat_damage_threshold if not artifact_revealed else heat_damage_threshold * 0.6
-	heat_bar.modulate = Color(1.0, 0.25, 0.15) if heat > danger else Color(1.0, 0.65, 0.2)
-	integrity_bar.modulate = Color(1.0, 0.3, 0.3) if artifact_health < 50.0 else Color(0.4, 0.9, 1.0)
-	var limit: float = heat_damage_threshold * (0.6 if artifact_revealed else 1.0)
-	_set_hot(heat > limit and _mining_grace > 0.0)
+	_set_hot(heat > danger_ratio() * heat_max and _mining_grace > 0.0)
+	if not artifact_revealed:                       # รัศมีรอบหินเรืองส้มแดงตามความร้อน
+		rock_shape.color = rock_color.lerp(Color(1.0, 0.35, 0.1, 0.9), clampf(heat / heat_max, 0.0, 1.0))
+	queue_redraw()                                  # วงแหวนความคืบหน้า
 	if info_label.visible:
 		_refresh_info_label()
 
@@ -457,14 +492,13 @@ func _refresh_info_label() -> void:
 	else:
 		lines.append("Tier %d - %s" % [tier, artifact_name])
 		lines.append("Quality so far: %d%%" % int(artifact_health))
-	var mult: float = MeteoriteTiers.defense_multiplier(tier, Game.drill_strength)
+	var mult := pierce_mult()
 	if mult >= 0.999:
-		lines.append("[OK] DEF %.1f - your Drill is enough" % defense)
+		lines.append("[OK] DEF %.1f - Drill pierces fully" % defense)
+	elif mult < 0.02:
+		lines.append("[X] DEF %.1f - CLANG! need Drill %.1f+" % [defense, MeteoriteTiers.drill_to_scratch(tier)])
 	else:
-		lines.append(
-			"[!] DEF %.1f - Drill %d: mining at %d%% speed"
-			% [defense, int(Game.drill_strength), int(mult * 100.0)]
-		)
+		lines.append("[!] DEF %.1f - pierce %d%% (full at Drill %.1f)" % [defense, int(mult * 100.0), defense])
 	info_label.text = "\n".join(lines)
 
 
@@ -472,3 +506,41 @@ func _set_hot(on: bool) -> void:
 	if on != _hot:
 		_hot = on
 		Game.set_rock_hot(get_instance_id(), on) 
+
+func danger_ratio() -> float:
+	return heat_damage_threshold * (0.6 if artifact_revealed else 1.0) / heat_max
+
+func overdrive_mult() -> float:
+	var d := danger_ratio()
+	return 1.0 + OVERDRIVE_MAX * smoothstep(d * SWEET_START, d, heat / heat_max)
+
+func pierce_mult() -> float:
+	return MeteoriteTiers.defense_multiplier(tier, Game.drill_strength)
+
+func extract_ratio() -> float:
+	return clampf(1.0 - rock_integrity / rock_integrity_max, 0.0, 1.0)
+
+func is_jammed() -> bool:
+	return _jammed
+
+func _jam() -> void:
+	_jammed = true
+	_mining_grace = 0.0
+	artifact_health = maxf(0.0, artifact_health - JAM_PENALTY)
+	Game.rock_jammed.emit()
+
+func _on_released() -> void:
+	var ratio := heat / heat_max
+	var d := danger_ratio()
+	if _hold_time >= VENT_MIN_HOLD and ratio >= d - VENT_WIDTH and ratio < d:
+		heat = maxf(0.0, heat - VENT_COOL)          # VENT! ปล่อยปุ่มตรงหน้าต่างพอดี
+		vent_flash = 0.6
+		Game.vented.emit()
+
+func _draw() -> void:
+	var progress := extract_ratio()
+	if artifact_collected or artifact_revealed or progress <= 0.01:
+		return
+	var r : float = 62.0 * MeteoriteTiers.SIZE[clampi(tier, 1, 10) - 1]
+	draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(1, 1, 1, 0.15), 4.0)
+	draw_arc(Vector2.ZERO, r, -PI * 0.5, -PI * 0.5 + TAU * progress, 48, Color(1, 1, 1, 0.8), 4.0)

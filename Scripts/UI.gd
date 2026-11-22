@@ -3,12 +3,13 @@ extends Control
 const UI_FONT := preload("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf")
 const AUTO_OPEN_SHOP_AFTER_DOCK := false        # true = เปิด popup อัปเกรดเองตอนกลับยานถ้ามีของซื้อได้
 
-@onready var oxygen_bar: ProgressBar = $OxygenBar
-@onready var tether_bar: ProgressBar = $TetherBar
+@onready var oxygen_bar: Control = $OxygenBar
+@onready var tether_bar: Control = $TetherBar
 @onready var points_label: Label = $PointsLabel
 @onready var artifacts_label: Label = $ArtifactsLabel
 @onready var hint_label: Label = $HintLabel
 @onready var hit_flash: ColorRect = $HitFlash
+
 
 var _upgrade_panel: UpgradePanel
 var _btn_upgrades: Button
@@ -22,6 +23,8 @@ var _toast_tween: Tween
 
 
 func _ready() -> void:
+	oxygen_bar = _swap_gauge(oxygen_bar, Gauge.Style.TANK, Color(0.37, 0.89, 1.0))
+	tether_bar = _swap_gauge(tether_bar, Gauge.Style.ROPE, Color(0.92, 0.85, 0.65))
 	var t := Theme.new()
 	t.default_font = UI_FONT
 	theme = t           # ลูกทุกตัวของ UI (รวมสมุดสะสมและ popup ที่สร้างด้วยโค้ด) ใช้ฟอนต์นี้เอง
@@ -52,6 +55,26 @@ func _ready() -> void:
 	_build_menu()
 	_build_toast()
 	_build_banners()
+	
+	var chisel_hud := ChiselHud.new()
+	add_child(chisel_hud)
+	chisel_hud.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	chisel_hud.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	chisel_hud.offset_left = 16.0
+	chisel_hud.offset_right = 16.0 + 520.0
+	chisel_hud.offset_top = -128.0
+	chisel_hud.offset_bottom = -16.0
+
+	# ข้อความคำแนะนำย้ายไปมุมขวาล่างตามแวร์ไฟร์
+	hint_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	hint_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	hint_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint_label.offset_left = -520.0
+	hint_label.offset_right = -16.0
+	hint_label.offset_top = -40.0
+	hint_label.offset_bottom = -12.0
 
 	if has_node("PerfectLabel"):
 		$PerfectLabel.visible = false
@@ -348,3 +371,23 @@ func _on_artifact_collected(tier: int, artifact_name: String, quality: int, is_n
 func _on_docked(handed_in: int, earned: int) -> void:
 	if handed_in > 0:
 		_show_toast("HANDED IN   %d artifact%s   +%d pt" % [handed_in, "" if handed_in == 1 else "s", earned], Color(0.55, 1.0, 0.7))
+
+# แทนที่ ProgressBar เดิมด้วย Gauge ขนาดและตำแหน่งเดิมเป๊ะ (ไม่ต้องจัดเลย์เอาต์ใหม่)
+func _swap_gauge(old: Control, style: int, color: Color) -> Gauge:
+	var g := Gauge.new()
+	g.style = style
+	g.fill_color = color
+	g.anchor_left = old.anchor_left
+	g.anchor_top = old.anchor_top
+	g.anchor_right = old.anchor_right
+	g.anchor_bottom = old.anchor_bottom
+	g.offset_left = old.offset_left
+	g.offset_top = old.offset_top
+	g.offset_right = old.offset_right
+	g.offset_bottom = old.offset_bottom
+	g.grow_horizontal = old.grow_horizontal
+	g.grow_vertical = old.grow_vertical
+	add_child(g)
+	move_child(g, old.get_index())
+	old.queue_free()
+	return g

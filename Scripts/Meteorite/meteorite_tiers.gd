@@ -4,6 +4,7 @@ extends RefCounted
 # index 0 = Tier 1 ... index 9 = Tier 10
 const HP      := [30.0, 80.0, 150.0, 220.0, 320.0, 420.0, 560.0, 700.0, 850.0, 1000.0]
 const DEFENSE := [1.0, 1.0, 1.5, 2.0, 2.5, 3.0, 5.0, 7.0, 9.0, 11.0]
+const PIERCE_MIN := 0.5          # Drill ต่ำกว่า 50% ของ DEF = เจาะไม่เข้าเลย
 const VALUE   := [10, 16, 26, 42, 65, 100, 150, 225, 340, 500]
 const HEAT    := [1.0, 1.0, 1.1, 1.2, 1.3, 1.4, 1.55, 1.7, 1.85, 2.0]     # ความร้อนขึ้นเร็วขึ้น = skill check สูงขึ้น
 const SIZE    := [0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.15, 1.25, 1.35, 1.50]
@@ -82,4 +83,11 @@ static func artifact_name(tier: int) -> String:
 	return ArtifactDB.all_names()[clampi(tier, 1, 10) - 1]
 
 static func defense_multiplier(tier: int, drill: float) -> float:
-	return clampf(drill / DEFENSE[clampi(tier, 1, 10) - 1], DEF_FLOOR, 1.0)
+	var ratio: float = drill / DEFENSE[clampi(tier, 1, 10) - 1]
+	return smoothstep(PIERCE_MIN, 1.0, ratio)
+	
+static func drill_for_full(tier: int) -> float:
+	return DEFENSE[clampi(tier, 1, 10) - 1]
+
+static func drill_to_scratch(tier: int) -> float:
+	return DEFENSE[clampi(tier, 1, 10) - 1] * PIERCE_MIN

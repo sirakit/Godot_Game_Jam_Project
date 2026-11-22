@@ -158,8 +158,6 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_pressed("chisel"):
 			is_chiseling = true
 			current_meteorite.chisel(delta, Game.chisel_strength)
-		else:
-			current_meteorite.cool_down(delta)
 		if Input.is_action_just_pressed("interact"):
 			if current_meteorite.collect():
 				_set_target(null)

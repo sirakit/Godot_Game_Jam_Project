@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dmtdyso0b36d"]
 
-[ext_resource type="Script" uid="uid://csqpanbdyjcw1" path="res://Scripts/debris.gd" id="1_el654"]
+[ext_resource type="Script" uid="uid://csqpanbdyjcw1" path="res://Scripts/Debris/debris.gd" id="1_el654"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_xepy2"]
 

@@ -15,6 +15,9 @@ signal artifact_collected(tier: int, artifact_name: String, quality: int, is_new
 signal heat_danger_changed(active: bool)
 signal launched()
 signal docked(handed_in: int, earned: int)
+signal vented()
+signal rock_jammed()
+signal clang()
 
 
 var restart_progress: float = 0.0
@@ -51,7 +54,7 @@ const UPGRADE_DESC := {
 	"oxygen": "More time outside the ship before you are forced back.",
 	"chisel": "Breaks meteorite HP faster. Works on every tier.",
 	"tether": "Fly farther (opens new zones) and move a little faster.",
-	"drill": "Shreds meteorite DEF. High tiers mine at only 25% speed without it.",
+	"drill": "Pierces rock DEF. Under half a rock's DEF you cannot scratch it at all.",
 	"income": "More credits for every artifact you hand in.",
 	"speed": "Cross the map faster and save oxygen.",
 }
