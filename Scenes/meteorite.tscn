@@ -20,7 +20,7 @@ color = Color(0.050980393, 0.06666667, 0.46666667, 0.8)
 polygon = PackedVector2Array(-11, -16, 9, -25, 12, -17, 25, -11, 25, 6, 18, 18, 5, 22, 4, 16, -6, 16, -10, 20, -15, 12, -22, -1)
 
 [node name="Sprite2D" type="Sprite2D" parent="Visual/RockShape" unique_id=176198367]
-position = Vector2(-6.197802, 4.0869575)
+position = Vector2(3.3946304, -4.086956)
 scale = Vector2(0.20785452, 0.20559524)
 texture = ExtResource("2_yk4mi")
 

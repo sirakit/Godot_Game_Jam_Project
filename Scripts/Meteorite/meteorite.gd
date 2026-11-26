@@ -1,8 +1,8 @@
 extends Node2D
 
 const SKIN_PATH := "res://Scenes/meteorite_skins/tier_%02d.tscn"
-const HEAVY_ROCK_PATH := "res://Assets/sprites/meteorites/meteorite_2.png"
-const HEAVY_ROCK_FIX := 1.5
+const TIER_SPRITE_PATH: String = "res://Assets/sprites/meteorites/tier_%02d.png"
+const BASE_ROCK_DISPLAY_SIZE: float = 112.0
 const OVERDRIVE_MAX := 0.5        # โบนัสความเร็วตอกสูงสุดที่เส้นอันตราย
 const SWEET_START := 0.45         # Overdrive เริ่มที่ 45% ของเส้นอันตราย
 const VENT_WIDTH := 0.17          # หน้าต่าง VENT กว้าง 17% ของ heat_max ใต้เส้นอันตราย
@@ -417,10 +417,11 @@ func _apply_tier() -> void:
 	artifact_tint = MeteoriteTiers.TINTS[i].lightened(0.3)
 	rock_scale_mult = MeteoriteTiers.SIZE[i]
 	hover_area.scale = Vector2.ONE * MeteoriteTiers.SIZE[i]
-	if tier >= 7:
-		rock_scale_mult *= HEAVY_ROCK_FIX
-		if ResourceLoader.exists(HEAVY_ROCK_PATH):
-			rock_texture = load(HEAVY_ROCK_PATH) as Texture2D
+
+	var sprite_path: String = TIER_SPRITE_PATH % tier
+	if ResourceLoader.exists(sprite_path):
+		rock_texture = load(sprite_path) as Texture2D
+
 	drift_radius = 30.0 + 5.0 * tier
 	drift_speed = 0.8 + 0.1 * tier
 	spin_speed = 0.2 + 0.04 * tier
@@ -430,7 +431,12 @@ func _apply_visuals() -> void:
 	rock_shape.color = rock_color
 	if rock_texture != null:
 		rock_sprite.texture = rock_texture
-	rock_sprite.scale *= rock_scale_mult
+
+	# ปรับสเกลจากขนาดพิกเซลจริงของรูป เพื่อป้องกันปัญหาหินบางรูปเล็กหรือใหญ่เกินไป
+	if rock_sprite.texture != null:
+		var longest_rock: float = float(maxi(rock_sprite.texture.get_width(), rock_sprite.texture.get_height()))
+		if longest_rock > 0.0:
+			rock_sprite.scale = Vector2.ONE * ((BASE_ROCK_DISPLAY_SIZE / longest_rock) * rock_scale_mult)
 
 	artifact_sprite.visible = false
 	var tex: Texture2D = ArtifactDB.get_texture(artifact_name)
@@ -441,10 +447,10 @@ func _apply_visuals() -> void:
 		tex = _make_placeholder_orb()
 		artifact_sprite.texture = tex
 		artifact_sprite.modulate = artifact_tint
-	var longest: float = float(maxi(tex.get_width(), tex.get_height()))
-	_artifact_final_scale = Vector2.ONE * (artifact_display_size / longest)
-	artifact_sprite.scale = _artifact_final_scale
 
+	var longest_art: float = float(maxi(tex.get_width(), tex.get_height()))
+	_artifact_final_scale = Vector2.ONE * (artifact_display_size / longest_art)
+	artifact_sprite.scale = _artifact_final_scale
 
 func _make_placeholder_orb() -> Texture2D:
 	var g := Gradient.new()
