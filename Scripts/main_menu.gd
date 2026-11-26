@@ -113,7 +113,7 @@ func _on_start_pressed() -> void:
 	tw.tween_property(btn_start, "scale", Vector2.ZERO, 0.12)
 	tw.tween_callback(func() -> void:
 		Game.reset_all()
-		get_tree().change_scene_to_file("res://Scenes/space.tscn")
+		get_tree().change_scene_to_file("res://Scenes/tutorial.tscn")
 	)
 
 

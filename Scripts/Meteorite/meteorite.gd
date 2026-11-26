@@ -11,6 +11,8 @@ const VENT_MIN_HOLD := 0.3        # ต้องค้างตอกอย่�
 const JAM_RESUME := 0.5           # หลัง JAM ต้องเย็นลงถึง 50% ถึงตอกต่อได้
 const JAM_PENALTY := 8.0          # JAM หักคุณภาพ
 const GRIND_HEAT := 1.5           # เจาะไม่เข้า: ความร้อนเพิ่มสูงสุด +150%
+const HINT_FONT: Font = preload("res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf")
+const HINT_COLOR := Color(1.0, 0.95, 0.55)
 
 @export_group("Artifact")
 @export var rock_integrity_max: float = 30.0
@@ -52,6 +54,7 @@ var _rock_base_pos: Vector2 = Vector2.ZERO
 var _artifact_final_scale: Vector2 = Vector2.ONE
 var _ready_beacon_ring: Line2D = null
 var _ready_sparkles: CPUParticles2D = null
+var _collect_hint: Node2D = null
 
 var _jammed: bool = false
 var _hold_time: float = 0.0
@@ -246,6 +249,7 @@ func reveal_artifact() -> void:
 	# 3. สร้างเศษหินระเบิดกระจาย + ออร่าประกายดาวบอกว่ากดเก็บได้แล้ว
 	_spawn_rock_break_burst()
 	_create_collect_ready_aura()
+	_create_collect_hint()
 	_set_bars_visible(true)
 
 
@@ -357,10 +361,52 @@ func _create_collect_ready_aura() -> void:
 	visual.add_child(_ready_sparkles)
 
 
+func _create_collect_hint() -> void:
+	# "COLLECT" text with a bobbing down arrow, floating right above the artifact.
+	# Child of the meteorite (not of Visual) so it does not spin with the rock.
+	if is_instance_valid(_collect_hint):
+		return
+	var base_y: float = -(artifact_display_size * 0.5 + 40.0)
+	_collect_hint = Node2D.new()
+	_collect_hint.z_index = 15
+	_collect_hint.position = Vector2(0.0, base_y)
+
+	var label := Label.new()
+	label.text = "COLLECT"
+	label.size = Vector2(160.0, 24.0)
+	label.position = Vector2(-80.0, -28.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_override("font", HINT_FONT)
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", HINT_COLOR)
+	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+	label.add_theme_constant_override("outline_size", 6)
+	_collect_hint.add_child(label)
+
+	var arrow := Polygon2D.new()
+	arrow.polygon = PackedVector2Array([Vector2(-9.0, -2.0), Vector2(9.0, -2.0), Vector2(0.0, 12.0)])
+	arrow.color = HINT_COLOR
+	_collect_hint.add_child(arrow)
+
+	_collect_hint.modulate.a = 0.0
+	add_child(_collect_hint)
+
+	var fade: Tween = _collect_hint.create_tween()
+	fade.tween_property(_collect_hint, "modulate:a", 1.0, 0.25)
+
+	var bob: Tween = _collect_hint.create_tween().set_loops()
+	bob.tween_property(_collect_hint, "position:y", base_y + 7.0, 0.45) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	bob.tween_property(_collect_hint, "position:y", base_y, 0.45) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
 func _play_collect_animation(final_value: int, is_perfect: bool) -> void:
 	# ปิดการตรวจจับชนแล้วดูดตัวแร่วิ่งเข้าหาตัวผู้เล่นพร้อมข้อความลอย
 	hover_area.set_deferred("monitoring", false)
 	hover_area.set_deferred("monitorable", false)
+	if is_instance_valid(_collect_hint):
+		_collect_hint.queue_free()
 	if is_instance_valid(_ready_beacon_ring):
 		_ready_beacon_ring.queue_free()
 	if is_instance_valid(_ready_sparkles):
@@ -448,8 +494,8 @@ func _apply_visuals() -> void:
 
 func _make_placeholder_orb() -> Texture2D:
 	var g := Gradient.new()
-	g.set_color(0, Color(1.0, 1.0, 1.0, 1.0))
-	g.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
+	g.offsets = PackedFloat32Array([0.0, 0.6, 1.0])        # solid core, then a short soft edge
+	g.colors = PackedColorArray([Color(1.0, 1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0, 1.0), Color(1.0, 1.0, 1.0, 0.0)])
 	var t := GradientTexture2D.new()
 	t.gradient = g
 	t.fill = GradientTexture2D.FILL_RADIAL

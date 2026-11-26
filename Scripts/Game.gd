@@ -18,6 +18,7 @@ signal docked(handed_in: int, earned: int)
 signal vented()
 signal rock_jammed()
 signal clang()
+signal refueled()                       # emitted when docking actually refills O2
 
 
 var restart_progress: float = 0.0
@@ -89,6 +90,8 @@ func start_outside() -> void:
 
 func dock(penalty: float = 0.0) -> void:
 	is_outside = false
+	var needed_refuel: bool = oxygen < oxygen_max - 0.5
+	reset_trip()                                      # refuel right when docking (bar fills now, not on next launch)
 	var lost := 0
 	var handed := carried_artifacts.size()
 	var gained := 0
@@ -107,6 +110,8 @@ func dock(penalty: float = 0.0) -> void:
 		dock_penalty_applied.emit(penalty, lost)      # ป้ายค่าปรับสำคัญกว่า จึงไม่ซ้อนป้ายสรุป
 	else:
 		docked.emit(handed, gained)
+	if needed_refuel:
+		refueled.emit()
 
 func add_artifact(art_data: Dictionary) -> void:
 	carried_artifacts.append(art_data)

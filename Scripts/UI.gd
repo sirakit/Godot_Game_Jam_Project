@@ -20,6 +20,9 @@ var _toast: Label
 var _dock_banner: Label
 var _heat_warn: Label
 var _toast_tween: Tween
+var _o2_note: Label
+var _o2_low: bool = false
+var _o2_refill_until: float = 0.0
 
 
 func _ready() -> void:
@@ -41,6 +44,7 @@ func _ready() -> void:
 	Game.artifact_collected.connect(_on_artifact_collected)
 	Game.heat_danger_changed.connect(_on_heat_danger)
 	Game.docked.connect(_on_docked)
+	Game.refueled.connect(_on_refueled)
 	
 
 	hit_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE   # ไม่งั้นบล็อกเมาส์ ทำให้ hover/แตะหินไม่ติด
@@ -55,6 +59,7 @@ func _ready() -> void:
 	_build_menu()
 	_build_toast()
 	_build_banners()
+	_build_o2_note()
 	
 	var chisel_hud := ChiselHud.new()
 	add_child(chisel_hud)
@@ -231,6 +236,7 @@ func _on_main_menu_pressed() -> void:
 # ---------- ทุกเฟรม ----------
 func _process(_delta: float) -> void:
 	var t := Time.get_ticks_msec() / 1000.0
+	_update_o2_note(t)
 	var docked_now := not Game.is_outside and not Game.ui_modal_open   # popup เปิดอยู่ไม่ต้องโชว์
 	_dock_banner.visible = docked_now
 	if docked_now:
@@ -280,6 +286,7 @@ func _hint_text() -> String:
 func _on_oxygen_changed(value, max_value) -> void:
 	oxygen_bar.max_value = max_value
 	oxygen_bar.value = value
+	_o2_low = Game.is_outside and value / max(1.0, max_value) < 0.25
 	oxygen_bar.modulate = Color(1, 0.3, 0.3) if value / max(1.0, max_value) < 0.25 else Color.WHITE
 
 func _on_tether_changed(value, max_value) -> void:
@@ -355,6 +362,33 @@ func _build_banners() -> void:
 	_heat_warn.offset_right = 400.0
 	_heat_warn.offset_top = 120.0
 	_heat_warn.text = "OVERHEATING!   release to cool down"
+
+func _build_o2_note() -> void:
+	# Status text right of the O2 bar: blinking "LOW O2!" while outside, "O2 REFILLED" after docking
+	_o2_note = _make_banner(22, Color(1.0, 0.3, 0.25))
+	_o2_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_o2_note.position = Vector2(350.0, 12.0)
+	_o2_note.size = Vector2(420.0, 32.0)
+	_o2_note.add_theme_constant_override("outline_size", 6)
+
+func _update_o2_note(t: float) -> void:
+	if _o2_note == null:
+		return
+	if _o2_low:
+		_o2_note.text = "LOW O2!   dock at the ship"
+		_o2_note.add_theme_color_override("font_color", Color(1.0, 0.3, 0.25))
+		_o2_note.modulate.a = 0.55 + 0.45 * absf(sin(t * 9.0))
+		_o2_note.visible = true
+	elif t < _o2_refill_until:
+		_o2_note.text = "O2 REFILLED"
+		_o2_note.add_theme_color_override("font_color", Color(0.55, 1.0, 0.7))
+		_o2_note.modulate.a = 1.0
+		_o2_note.visible = true
+	else:
+		_o2_note.visible = false
+
+func _on_refueled() -> void:
+	_o2_refill_until = Time.get_ticks_msec() / 1000.0 + 2.5
 
 func _on_heat_danger(active: bool) -> void:
 	_heat_warn.visible = active

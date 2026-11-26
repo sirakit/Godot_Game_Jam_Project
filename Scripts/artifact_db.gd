@@ -3,10 +3,10 @@ extends RefCounted
 
 const COMMON_NAMES := ["Basalt Shard", "Iron Nodule"]
 const RARE_NAMES := [ "Carbon Chondrite", "Quartz Cluster"]
-const EPIC_NAMES := ["Silica, Geode", "Nickel Vein"]
+const EPIC_NAMES := ["Silica Geode", "Nickel Vein"]
 const LEGENDARY_NAMES := ["Sapphire Core", "Voidglass Crystal"]
 const ANCIENT_NAMES := ["Star Iron Ingot", "Ancient Alloy Relic"]
-const SPRITE_DIR := ""
+const SPRITE_DIR := "res://Assets/sprites/artifacts/"
 
 static func all_names() -> Array:
 	return COMMON_NAMES + RARE_NAMES + EPIC_NAMES + LEGENDARY_NAMES + ANCIENT_NAMES
