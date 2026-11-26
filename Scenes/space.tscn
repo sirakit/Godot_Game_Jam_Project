@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" uid="uid://dmtdyso0b36d" path="res://Scenes/debris.tscn" id="7_kqa63"]
 [ext_resource type="Script" uid="uid://bsf5x6o7re4ep" path="res://Scripts/collection_log.gd" id="9_kqa63"]
 [ext_resource type="FontFile" uid="uid://dvugw8ql7pn07" path="res://Assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf" id="11_0b4c6"]
+[ext_resource type="Texture2D" uid="uid://cff2doc4el5fg" path="res://Assets/hud/HUD O2.png" id="15_xfpl3"]
+[ext_resource type="Texture2D" uid="uid://bcdqagpeg2ima" path="res://Assets/hud/HUD Tether.png" id="16_k6lkr"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_xepy2"]
 blend_mode = 1
@@ -129,15 +131,16 @@ theme_override_fonts/font = ExtResource("11_0b4c6")
 layout_mode = 2
 columns = 2
 
-[node name="OxygenBar" type="ProgressBar" parent="CanvasLayer2/UI" unique_id=71382715]
+[node name="OxygenBar" type="TextureProgressBar" parent="CanvasLayer2/UI" unique_id=560104021]
 layout_mode = 1
 offset_left = 16.0
 offset_top = 14.0
 offset_right = 294.0
 offset_bottom = 41.0
-theme_override_fonts/font = ExtResource("11_0b4c6")
+nine_patch_stretch = true
+texture_under = ExtResource("15_xfpl3")
 
-[node name="TetherBar" type="ProgressBar" parent="CanvasLayer2/UI" unique_id=1037017662]
+[node name="TetherBar" type="TextureProgressBar" parent="CanvasLayer2/UI" unique_id=328159776]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
@@ -147,7 +150,8 @@ offset_top = -274.0
 offset_right = 259.0
 offset_bottom = -247.0
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("11_0b4c6")
+nine_patch_stretch = true
+texture_under = ExtResource("16_k6lkr")
 
 [node name="PointsLabel" type="Label" parent="CanvasLayer2/UI" unique_id=474903319]
 layout_mode = 0
