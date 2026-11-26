@@ -10,22 +10,13 @@ var _player: Node
 var _rock: Node2D = null
 var _lost_timer: float = 0.0
 var _gradient: GradientTexture2D
-var _grad_danger: float = -1.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_player = get_tree().get_first_node_in_group("player")
-
-# ไล่สีให้ "แดง" เริ่มตรงเส้นอันตรายพอดี (เส้นอยู่ 70% ก่อนแร่โผล่ และ 42% หลังแร่โผล่ จึงสร้างใหม่เมื่อค่าเปลี่ยน)
-func _make_gradient(d: float) -> void:
 	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.0, d * 0.75, d, 1.0])
-	g.colors = PackedColorArray([
-		Color(1.0, 0.85, 0.3),      # เหลือง: ปลอดภัย
-		Color(1.0, 0.6, 0.2),       # ส้ม: ใกล้เส้น
-		Color(0.95, 0.15, 0.1),     # แดง: เริ่มที่เส้นอันตราย
-		Color(0.6, 0.05, 0.05),     # แดงเข้ม: ใกล้ JAM
-	])
+	g.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	g.colors = PackedColorArray([Color(1.0, 0.85, 0.3), Color(1.0, 0.55, 0.15), Color(0.95, 0.15, 0.1)])
 	_gradient = GradientTexture2D.new()
 	_gradient.gradient = g
 	_gradient.width = 256
@@ -88,38 +79,37 @@ func _draw_bar(r: Rect2, ratio: float, fill: Color, text: String, font: Font) ->
 	var text_col := Color(0.05, 0.07, 0.12) if ratio > 0.45 else Color.WHITE
 	draw_string(font, r.position + Vector2(8.0, r.size.y - 6.0), text, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 16.0, 14, text_col)
 
-# แถบความร้อนแบบเรียบ: ไล่สีเหลือง → แดง + เส้นอันตราย + โซนแดงจางหลังเส้น ไม่มี COLD / OVERDRIVE / ช่องเขียว
 func _draw_heat(r: Rect2, font: Font) -> void:
 	var heat_r: float = clampf(_rock.heat / _rock.heat_max, 0.0, 1.0)
 	var d: float = _rock.danger_ratio()
-	if absf(d - _grad_danger) > 0.001:
-		_make_gradient(d)
-		_grad_danger = d
-
 	var dark := Color(0.12, 0.14, 0.2, 0.92)
 	draw_rect(r, dark)
-	draw_texture_rect(_gradient, r, false)
-	draw_rect(Rect2(r.position.x + r.size.x * heat_r, r.position.y, r.size.x * (1.0 - heat_r), r.size.y), dark)
+	draw_texture_rect(_gradient, r, false)                        # ไล่สีเต็มแถบ
+	draw_rect(Rect2(r.position.x + r.size.x * heat_r, r.position.y, r.size.x * (1.0 - heat_r), r.size.y), dark)   # บังส่วนที่ยังไม่ร้อน
 
+	var vw := r.size.x * ChiselHud.VENT_W
+	draw_rect(Rect2(r.position.x + r.size.x * d - vw, r.position.y - 4.0, vw, 4.0), Color(0.4, 1.0, 0.5))      # หน้าต่าง VENT
 	var dx := r.position.x + r.size.x * d
-	draw_rect(Rect2(dx, r.position.y, r.end.x - dx, r.size.y), Color(0.9, 0.1, 0.1, 0.22))     # โซนอันตราย โชว์ตลอด
-	draw_line(Vector2(dx, r.position.y - 5.0), Vector2(dx, r.end.y + 4.0), Color.WHITE, 3.0)   # เส้นอันตราย
+	draw_line(Vector2(dx, r.position.y - 5.0), Vector2(dx, r.end.y + 4.0), Color.WHITE, 3.0)                      # เส้นอันตราย
+	var sx := r.position.x + r.size.x * d * 0.45
+	draw_line(Vector2(sx, r.position.y), Vector2(sx, r.end.y), Color(1, 1, 1, 0.35), 1.0)                         # เริ่ม Overdrive
+	draw_rect(r, Color(1, 1, 1, 0.45), false, 2.0)
 
-	var hot := heat_r > d
-	draw_rect(r, Color(1.0, 0.3, 0.25, 0.95) if hot else Color(1, 1, 1, 0.45), false, 2.0)
-
-	var t := Time.get_ticks_msec() / 1000.0
-	var state := ""                                     # ปกติไม่ขึ้นข้อความอะไร
-	var col := Color(1.0, 0.3, 0.25)
+	var state := "COLD"
+	var col := Color(0.7, 0.85, 1.0)
 	if _rock.is_jammed():
 		state = "JAMMED"
-	elif hot:
-		state = "OVERHEAT   quality dropping"
-		col.a = 0.6 + 0.4 * absf(sin(t * 10.0))         # กะพริบเตือน
+		col = Color(1.0, 0.3, 0.25)
 	elif _rock.vent_flash > 0.0:
-		state = "NICE RELEASE!"
+		state = "VENT!"
 		col = Color(0.4, 1.0, 0.5)
-
+	elif heat_r > d:
+		state = "OVERHEAT  -quality"
+		col = Color(1.0, 0.3, 0.25)
+	elif heat_r > d * 0.45:
+		state = "OVERDRIVE  x%.2f" % _rock.overdrive_mult()
+		col = Color(1.0, 0.8, 0.3)
 	draw_string(font, r.position + Vector2(8.0, r.size.y - 6.0), "HEAT", HORIZONTAL_ALIGNMENT_LEFT, 80.0, 14, Color.WHITE)
-	if state != "":
-		draw_string(font, Vector2(r.end.x + 10.0, r.end.y - 5.0), state, HORIZONTAL_ALIGNMENT_LEFT, 220.0, 14, col)
+	draw_string(font, Vector2(r.end.x + 10.0, r.end.y - 5.0), state, HORIZONTAL_ALIGNMENT_LEFT, 190.0, 14, col)
+
+const VENT_W := 0.17
