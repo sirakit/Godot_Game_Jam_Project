@@ -11,6 +11,9 @@ static var _shared_color_ramp: Gradient = null
 @export var homing_time: float = 0.8
 @export var turn_rate_deg: float = 25.0
 
+@export_group("Visual")
+@export var display_size: float = 130.0   # px of the whole sprite canvas; 0 = keep the scale set in the scene
+
 @export_group("Wave Motion")
 @export var wave_frequency: float = 8.5
 @export var wave_amplitude: float = 130.0
@@ -69,6 +72,13 @@ func _ready() -> void:
 			_visual_node = child as Node2D
 			break
 			
+	if display_size > 0.0 and _visual_node is Sprite2D:
+		var spr := _visual_node as Sprite2D
+		if spr.texture != null:
+			var longest: float = float(maxi(spr.texture.get_width(), spr.texture.get_height()))
+			if longest > 0.0:
+				spr.scale = Vector2.ONE * (display_size / longest)
+
 	get_tree().create_timer(lifetime).timeout.connect(_on_timeout)
 	
 	# รอให้ Spawner กำหนด global_position และ direction ให้เสร็จในเฟรมแรกก่อนค่อยแสดงผล

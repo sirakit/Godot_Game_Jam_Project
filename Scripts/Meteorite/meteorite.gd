@@ -55,6 +55,7 @@ var _artifact_final_scale: Vector2 = Vector2.ONE
 var _ready_beacon_ring: Line2D = null
 var _ready_sparkles: CPUParticles2D = null
 var _collect_hint: Node2D = null
+var _despawning: bool = false
 
 var _jammed: bool = false
 var _hold_time: float = 0.0
@@ -214,6 +215,9 @@ func chisel(delta: float, strength: float) -> void:
 		if over:
 			artifact_health = maxf(0.0, artifact_health - damage_rate * delta)
 		if rock_integrity <= 0.0:
+			if MeteoriteTiers.is_secret(tier):
+				_burst_into_artifacts()
+				return
 			reveal_artifact()
 	else:
 		heat = minf(heat_max, heat + rate * 1.5 * delta)
@@ -288,6 +292,7 @@ func get_heat_ratio() -> float:
 
 func _spawn_rock_break_burst() -> void:
 	# ระเบิดเศษหินและฝุ่นควันออกรอบตัวตอนกะเทาะเปลือกหินแตก
+	var burst_scale: float = minf(rock_scale_mult, 2.5)
 	var burst := CPUParticles2D.new()
 	burst.emitting = false
 	burst.one_shot = true
@@ -296,12 +301,12 @@ func _spawn_rock_break_burst() -> void:
 	burst.explosiveness = 0.92
 	burst.spread = 180.0
 	burst.gravity = Vector2.ZERO
-	burst.initial_velocity_min = 70.0 * rock_scale_mult
-	burst.initial_velocity_max = 210.0 * rock_scale_mult
+	burst.initial_velocity_min = 70.0 * burst_scale
+	burst.initial_velocity_max = 210.0 * burst_scale
 	burst.damping_min = 180.0
 	burst.damping_max = 320.0
-	burst.scale_amount_min = 4.0 * rock_scale_mult
-	burst.scale_amount_max = 9.0 * rock_scale_mult
+	burst.scale_amount_min = 4.0 * burst_scale
+	burst.scale_amount_max = 9.0 * burst_scale
 	
 	var curve := Curve.new()
 	curve.add_point(Vector2(0.0, 1.0))
@@ -359,6 +364,86 @@ func _create_collect_ready_aura() -> void:
 	grad.set_color(1, Color(artifact_tint.r, artifact_tint.g, artifact_tint.b, 0.0))
 	_ready_sparkles.color_ramp = grad
 	visual.add_child(_ready_sparkles)
+
+
+func _apply_secret_overrides() -> void:
+	# Tier 11: ship-sized rock that is slow and heavy
+	rock_integrity_max = MeteoriteTiers.SECRET_HP
+	rock_scale_mult = MeteoriteTiers.SECRET_DISPLAY_SIZE / BASE_ROCK_DISPLAY_SIZE
+	hover_area.scale = Vector2.ONE * rock_scale_mult * 0.9
+	drift_radius = 20.0
+	drift_speed = 0.35
+	spin_speed = 0.05
+	for bar: Control in [extract_bar, heat_bar, integrity_bar]:
+		bar.scale = Vector2.ONE * 2.5
+	info_label.position = Vector2(-80.0, -MeteoriteTiers.SECRET_DISPLAY_SIZE * 0.4 - 80.0)
+
+
+func _burst_into_artifacts() -> void:
+	# The giant rock breaks apart into tier 10 artifacts that are already revealed and ready to collect
+	artifact_collected = true                       # blocks further chiseling
+	_set_hot(false)
+	_set_bars_visible(false)
+	info_label.visible = false
+	hover_area.set_deferred("monitoring", false)
+	hover_area.set_deferred("monitorable", false)
+	remove_from_group("meteorites")
+	_shake = 4.0
+	for i in 3:
+		_spawn_rock_break_burst()
+
+	var scene := load(scene_file_path) as PackedScene
+	var parent: Node = get_parent()
+	var count: int = MeteoriteTiers.SECRET_PICKUPS
+	var reach: float = MeteoriteTiers.SECRET_DISPLAY_SIZE * 0.3
+	var offset: float = randf() * TAU
+	for i in count:
+		var m := scene.instantiate()
+		m.tier = 10
+		parent.add_child(m)
+		m.global_position = global_position
+		var ang: float = offset + TAU * float(i) / float(count) + randf_range(-0.25, 0.25)
+		m.setup_as_pickup(global_position + Vector2.from_angle(ang) * randf_range(reach * 0.5, reach))
+
+	Game.end_secret_event()
+
+	var tw: Tween = create_tween()
+	tw.tween_property(visual, "modulate:a", 0.0, 0.5)
+	tw.tween_interval(0.8)                          # let the particles finish before freeing
+	tw.tween_callback(queue_free)
+
+
+func setup_as_pickup(dest: Vector2) -> void:
+	# Artifact released by the giant rock: already revealed, no rock shell, flies out to dest
+	drift_enabled = false
+	rock_integrity = 0.0
+	artifact_revealed = true
+	rock_shape.visible = false
+	artifact_sprite.visible = true
+	artifact_sprite.scale = Vector2.ZERO
+	var tw: Tween = create_tween().set_parallel(true)
+	tw.tween_property(artifact_sprite, "scale", _artifact_final_scale, 0.4) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "global_position", dest, 0.8) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_create_collect_ready_aura()
+	_create_collect_hint()
+
+
+func despawn() -> void:
+	# Fades the rock out and removes it (used when the secret event starts)
+	if artifact_collected or _despawning:
+		return
+	_despawning = true
+	remove_from_group("meteorites")
+	_set_hot(false)
+	_set_bars_visible(false)
+	info_label.visible = false
+	hover_area.set_deferred("monitoring", false)
+	hover_area.set_deferred("monitorable", false)
+	var tw: Tween = create_tween()
+	tw.tween_property(self, "modulate:a", 0.0, 0.8)
+	tw.tween_callback(queue_free)
 
 
 func _create_collect_hint() -> void:
@@ -464,13 +549,16 @@ func _apply_tier() -> void:
 	rock_scale_mult = MeteoriteTiers.SIZE[i]
 	hover_area.scale = Vector2.ONE * MeteoriteTiers.SIZE[i]
 
-	var sprite_path: String = TIER_SPRITE_PATH % tier
+	var sprite_path: String = TIER_SPRITE_PATH % mini(tier, 10)
 	if ResourceLoader.exists(sprite_path):
 		rock_texture = load(sprite_path) as Texture2D
 
 	drift_radius = 30.0 + 5.0 * tier
 	drift_speed = 0.8 + 0.1 * tier
 	spin_speed = 0.2 + 0.04 * tier
+
+	if MeteoriteTiers.is_secret(tier):
+		_apply_secret_overrides()
 
 
 func _apply_visuals() -> void:
@@ -594,5 +682,7 @@ func _draw() -> void:
 	if artifact_collected or artifact_revealed or progress <= 0.01:
 		return
 	var r : float = 62.0 * MeteoriteTiers.SIZE[clampi(tier, 1, 10) - 1]
+	if MeteoriteTiers.is_secret(tier):
+		r = MeteoriteTiers.SECRET_DISPLAY_SIZE * 0.4
 	draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(1, 1, 1, 0.15), 4.0)
 	draw_arc(Vector2.ZERO, r, -PI * 0.5, -PI * 0.5 + TAU * progress, 48, Color(1, 1, 1, 0.8), 4.0)

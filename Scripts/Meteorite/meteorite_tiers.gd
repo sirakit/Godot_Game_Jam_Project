@@ -15,6 +15,12 @@ const TINTS := [
 	Color(0.55, 0.15, 0.85, 0.85), Color(0.75, 0.20, 0.75, 0.85),
 	Color(0.90, 0.20, 0.45, 0.85), Color(1.00, 0.85, 0.30, 0.85),
 ]
+# Secret tier 11: not in ArtifactDB / the collection log. Uses the tier 10 sprite, is as big as the ship
+# and bursts into tier 10 artifacts. Triggered when the collection log is completed.
+const SECRET_TIER := 11
+const SECRET_HP := 2000.0
+const SECRET_DISPLAY_SIZE := 760.0   # px of the whole 1000px sprite canvas (visible rock is ~70% of it, ship is ~570px wide)
+const SECRET_PICKUPS := 8            # tier 10 artifacts released when it breaks
 const DEF_FLOOR := 0.25      # Drill ไม่พอ ยังตอกได้อย่างน้อย 25% ของความเร็ว
 
 # วงแหวน 5 โซนรอบยาน (รัศมีนอกสุดของแต่ละโซน) ตัวสุดท้ายคือขอบโลก = ระยะเชือกตัน
@@ -36,6 +42,9 @@ const RARITY_COLORS := [
 ]
 
 # tier 1-2 = COMMON, 3-4 = RARE, 5-6 = EPIC, 7-8 = LEGENDARY, 9-10 = ANCIENT (ตรงกับลำดับใน ArtifactDB)
+static func is_secret(tier: int) -> bool:
+	return tier == SECRET_TIER
+
 static func rarity(tier: int) -> int:
 	return (clampi(tier, 1, 10) - 1) >> 1
 

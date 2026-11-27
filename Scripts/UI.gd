@@ -45,6 +45,8 @@ func _ready() -> void:
 	Game.heat_danger_changed.connect(_on_heat_danger)
 	Game.docked.connect(_on_docked)
 	Game.refueled.connect(_on_refueled)
+	Game.secret_event_started.connect(_on_secret_started)
+	Game.secret_event_ended.connect(_on_secret_ended)
 	
 
 	hit_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE   # ไม่งั้นบล็อกเมาส์ ทำให้ hover/แตะหินไม่ติด
@@ -386,6 +388,12 @@ func _update_o2_note(t: float) -> void:
 		_o2_note.visible = true
 	else:
 		_o2_note.visible = false
+
+func _on_secret_started() -> void:
+	_show_toast("A COLOSSAL METEORITE APPEARED NEAR THE SHIP!\nASTEROIDS INCOMING - KEEP MOVING", Color(1.0, 0.3, 0.3))
+
+func _on_secret_ended() -> void:
+	_show_toast("THE GIANT SHATTERED!   COLLECT THE ARTIFACTS", Color(1.0, 0.85, 0.3))
 
 func _on_refueled() -> void:
 	_o2_refill_until = Time.get_ticks_msec() / 1000.0 + 2.5

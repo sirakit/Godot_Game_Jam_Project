@@ -9,23 +9,51 @@ extends Node2D
 @export var reach_margin: float = 1.1               # เกิดเลยระยะเชือกได้อีก 10%
 @export var spawn_interval: Vector2 = Vector2(0.5, 1.2)
 
+@export_group("Secret Event")
+@export var secret_delay: float = 3.0                                # wait so the "NEW DISCOVERY" toast can be read
+@export var secret_distance: Vector2 = Vector2(750.0, 900.0)         # from the ship, inside zone 1
+
 @onready var ship: Node2D = get_node("../Ship")
 @onready var player: Node2D = get_node("../Player")
 
 var _timer: float = 0.0
+var _secret_pending: bool = false
 
 func _ready() -> void:
+	Game.collection_completed.connect(_on_collection_completed)
 	_reset_timer()
 	for i in 80:                                      # เติมโซนที่เปิดอยู่ให้เต็มตั้งแต่เริ่ม
 		if not _fill_one_zone():
 			break
 
 func _process(delta: float) -> void:
+	if Game.secret_phase == 1:
+		return                                    # giant meteorite fight: no normal spawns
 	_timer -= delta
 	if _timer > 0.0:
 		return
 	_reset_timer()
 	_fill_one_zone()
+
+func _on_collection_completed() -> void:
+	if Game.secret_phase != 0 or _secret_pending:
+		return
+	_secret_pending = true
+	create_tween().tween_callback(_begin_secret_event).set_delay(secret_delay)
+
+func _begin_secret_event() -> void:
+	Game.start_secret_event()
+	for m in get_tree().get_nodes_in_group("meteorites"):
+		if m.has_method("despawn"):
+			m.despawn()
+	_spawn_secret_boss()
+
+func _spawn_secret_boss() -> void:
+	var pos: Vector2 = ship.global_position + Vector2.from_angle(randf_range(0.0, TAU)) * randf_range(secret_distance.x, secret_distance.y)
+	var m := meteorite_scene.instantiate()
+	m.tier = MeteoriteTiers.SECRET_TIER
+	m.position = to_local(pos)
+	add_child(m)
 
 func _reset_timer() -> void:
 	_timer = randf_range(spawn_interval.x, spawn_interval.y)

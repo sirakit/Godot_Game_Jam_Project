@@ -1,6 +1,8 @@
 extends Node2D
 
 const RESTART_HOLD_TIME := 1.2
+const DEBUG_PRESSES := 5              # debug cheats (debug builds only): press the key this many times...
+const DEBUG_WINDOW := 2.0             # ...within this many seconds.   L = unlock whole log,  U = max all upgrades
 
 @onready var ship: Node2D = $Ship
 @onready var player: CharacterBody2D = $Player
@@ -8,6 +10,8 @@ const RESTART_HOLD_TIME := 1.2
 
 var _restart_hold: float = 0.0
 var _restart_armed: bool = false
+var _debug_l_times: Array[float] = []
+var _debug_u_times: Array[float] = []
 
 func _ready() -> void:
 	get_viewport().physics_object_picking = true
@@ -55,6 +59,22 @@ func _process(delta: float) -> void:
 		Game.restart_progress = 0.0
 
 func _unhandled_input(event: InputEvent) -> void:
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_L and _debug_mashed(_debug_l_times):
+			Game.debug_unlock_all_logs()
+		elif event.physical_keycode == KEY_U and _debug_mashed(_debug_u_times):
+			Game.debug_max_all_upgrades()
 	if event.is_action_pressed("toggle_log"):
 		var log_panel := get_node("CanvasLayer2/UI/CollectionLog")
 		log_panel.visible = not log_panel.visible
+
+# DEBUG: records a key press and returns true once it was pressed DEBUG_PRESSES times within DEBUG_WINDOW seconds
+func _debug_mashed(times: Array[float]) -> bool:
+	var now: float = Time.get_ticks_msec() / 1000.0
+	times.append(now)
+	while not times.is_empty() and now - times[0] > DEBUG_WINDOW:
+		times.pop_front()
+	if times.size() >= DEBUG_PRESSES:
+		times.clear()
+		return true
+	return false

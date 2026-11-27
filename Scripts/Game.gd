@@ -18,10 +18,13 @@ signal docked(handed_in: int, earned: int)
 signal vented()
 signal rock_jammed()
 signal clang()
+signal secret_event_started()
+signal secret_event_ended()
 signal refueled()                       # emitted when docking actually refills O2
 
 
 var restart_progress: float = 0.0
+var secret_phase: int = 0               # 0 = not triggered, 1 = giant meteorite + asteroid attack, 2 = finished
 
 var discovered_artifacts: Dictionary = {}   # ชื่อ -> true
 var thrust_speed_bonus: float = 0.0
@@ -200,6 +203,38 @@ func upgrade_speed() -> void:
 	if _buy("speed"):
 		thrust_speed_bonus += SPEED_PER_LEVEL
 
+# DEBUG: buys every upgrade up to the cap for free (real purchase functions, so all effects apply) and keeps your points
+func debug_max_all_upgrades() -> void:
+	var saved_points: int = points
+	points = 1000000000
+	for id in upgrade_levels.keys():
+		for _i in UPGRADE_CAP:
+			call("upgrade_" + str(id))
+	points = saved_points
+	points_changed.emit(points)
+	upgrades_changed.emit()
+
+# DEBUG: marks every artifact as discovered (same result as collecting them all) and completes the log
+func debug_unlock_all_logs() -> void:
+	for n in ArtifactDB.all_names():
+		discovered_artifacts[n] = true
+		collected_counts[n] = maxi(int(collected_counts.get(n, 0)), 1)
+		best_quality[n] = maxi(int(best_quality.get(n, 0)), 100)
+	collection_changed.emit()
+	collection_completed.emit()
+
+func start_secret_event() -> void:
+	if secret_phase != 0:
+		return
+	secret_phase = 1
+	secret_event_started.emit()
+
+func end_secret_event() -> void:
+	if secret_phase != 1:
+		return
+	secret_phase = 2
+	secret_event_ended.emit()
+
 func reset_all() -> void:                        # ปุ่ม restart 
 	oxygen_max = 100.0
 	tether_length_max = 500.0
@@ -210,6 +245,7 @@ func reset_all() -> void:                        # ปุ่ม restart
 	points = 0
 	total_earned = 0
 	recall_progress = 0.0
+	secret_phase = 0
 	carried_artifacts.clear()
 	is_outside = false
 	
